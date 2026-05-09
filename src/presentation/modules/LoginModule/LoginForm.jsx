@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../../application/context/AuthContext';
 import {
   Box,
   Button,
@@ -20,9 +22,19 @@ import { useLogin } from '../../../application/use-cases/useLogin';
 
 export const LoginForm = () => {
   const { login, loading, error } = useLogin();
+  const { currentUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    if (currentUser && currentUser.role) {
+      if (currentUser.role === 'admin') navigate('/admin');
+      else if (currentUser.role === 'coordinador') navigate('/coordinador');
+      else if (currentUser.role === 'profesor') navigate('/profesor');
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
