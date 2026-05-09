@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../infrastructure/firebase/firebaseConfig';
 
@@ -12,16 +12,37 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+      if (user) {
+        let simulatedRole = 'profesor'; // Por defecto
+
+        if (user.email === 'admin@test.com') {
+          simulatedRole = 'admin';
+        } else if (user.email === 'coordinador@test.com') {
+          simulatedRole = 'coordinador';
+        }
+
+        setCurrentUser({ ...user, role: simulatedRole });
+      } else {
+        setCurrentUser(null);
+      }
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
 
+
+  //**fix/auth-context-helpers */
+
+  const isAdmin = () => currentUser?.role === 'admin';
+  const isCoordinador = () => currentUser?.role === 'coordinador';
+  const isProfesor = () => currentUser?.role === 'profesor';
+
   return (
-    <AuthContext.Provider value={{ currentUser, loading }}>
+    <AuthContext.Provider value={{ currentUser, loading, isAdmin, isCoordinador, isProfesor }}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);
