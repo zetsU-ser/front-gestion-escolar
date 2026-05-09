@@ -1,4 +1,4 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Stack } from '@mui/material';
 import { useContext } from 'react';
 import { AuthContext } from '../../../application/context/AuthContext';
 import { authRepository } from '../../../infrastructure/repositories/HttpAuthRepository';
@@ -18,7 +18,15 @@ export const AdminDashboard = () => {
       <Typography variant="h3" color="primary">Panel de Administrador</Typography>
       <Typography variant="h6" sx={{ mt: 2 }}>Bienvenido, {currentUser?.email}</Typography>
       <Typography variant="body1">Rol detectado: {currentUser?.role}</Typography>
-      <Button variant="contained" color="secondary" sx={{ mt: 4 }} onClick={handleLogout}>Cerrar Sesión</Button>
+      <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4 }}>
+        <Button variant="contained" onClick={() => navigate('/usuarios')}>
+          Gestión de Usuarios
+        </Button>
+        <Button variant="outlined" color="secondary" onClick={handleLogout}>
+          Cerrar Sesión
+        </Button>
+      </Stack>
     </Box>
   );
 };
+
