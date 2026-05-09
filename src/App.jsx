@@ -1,35 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useContext } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './infrastructure/theme/theme';
+import { AuthProvider, AuthContext } from './application/context/AuthContext';
+import { LoginForm } from './presentation/modules/LoginModule/LoginForm';
+import { Box, Typography, Button } from '@mui/material';
+import { authRepository } from './infrastructure/repositories/HttpAuthRepository';
+
+const MainContent = () => {
+  const { currentUser } = useContext(AuthContext);
+
+  if (currentUser) {
+    return (
+      <Box sx={{ textAlign: 'center', mt: 10 }}>
+        <Typography variant="h4" color="primary">¡Bienvenido al sistema!</Typography>
+        <Typography variant="body1" sx={{ mt: 2 }}>Usuario logueado: {currentUser.email}</Typography>
+        <Button 
+          variant="outlined" 
+          color="secondary" 
+          sx={{ mt: 4 }}
+          onClick={() => authRepository.logout()}
+        >
+          Cerrar Sesión
+        </Button>
+      </Box>
+    );
+  }
+
+  return <LoginForm />;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <Box 
+          sx={{ 
+            minHeight: '100vh', 
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <MainContent />
+        </Box>
+      </AuthProvider>
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;
