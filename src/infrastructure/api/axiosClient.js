@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { auth } from '../firebase/firebaseConfig';
 
-//**HU-01: Iniciar sesión como usuario */
-
+/**
+ * CLIENTE AXIOS: axiosClient
+ * Instancia centralizada para peticiones HTTP al microservicio.
+ * Incluye un interceptor para adjuntar el ID Token de Firebase en cada petición,
+ * permitiendo la validación JWT en el backend con Spring Security.
+ */
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
   headers: {
@@ -10,11 +14,13 @@ const axiosClient = axios.create({
   },
 });
 
+// INTERCEPTOR DE PETICIONES: Sincronización de Seguridad
 axiosClient.interceptors.request.use(
   async (config) => {
     const user = auth.currentUser;
 
     if (user) {
+      // Obtenemos el token JWT fresco de Firebase
       const token = await user.getIdToken();
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,5 +32,15 @@ axiosClient.interceptors.request.use(
   }
 );
 
-export default axiosClient;
+// INTERCEPTOR DE RESPUESTAS: Manejo Global de Errores (Opcional, pero recomendado)
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("Sesión expirada o no autorizada.");
+    }
+    return Promise.reject(error);
+  }
+);
 
+export default axiosClient;

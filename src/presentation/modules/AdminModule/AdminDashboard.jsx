@@ -1,32 +1,61 @@
-import { Box, Typography, Button, Stack } from '@mui/material';
+import { Typography } from '@mui/material';
+import GroupIcon from '@mui/icons-material/Group';
 import { useContext } from 'react';
 import { AuthContext } from '../../../application/context/AuthContext';
-import { authRepository } from '../../../infrastructure/repositories/HttpAuthRepository';
 import { useNavigate } from 'react-router-dom';
+import { 
+  DashboardContainer, 
+  WelcomePaper, 
+  Title, 
+  EmailText, 
+  StyledDivider, 
+  DescriptionText, 
+  ActionStack, 
+  ManagementButton 
+} from './AdminDashboard.styles';
 
+/**
+ * COMPONENTE: AdminDashboard
+ * Punto de entrada para el rol ADMINISTRADOR.
+ * Su función principal es la gestión de usuarios (Cuentas de sistema).
+ */
 export const AdminDashboard = () => {
+  // --- CONSUMO DE CONTEXTO ---
+  // Obtenemos la información de sesión para personalizar el saludo
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await authRepository.logout();
-    navigate('/');
-  };
-
   return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <Typography variant="h3" color="primary">Panel de Administrador</Typography>
-      <Typography variant="h6" sx={{ mt: 2 }}>Bienvenido, {currentUser?.email}</Typography>
-      <Typography variant="body1">Rol detectado: {currentUser?.role}</Typography>
-      <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 4 }}>
-        <Button variant="contained" onClick={() => navigate('/usuarios')}>
-          Gestión de Usuarios
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={handleLogout}>
-          Cerrar Sesión
-        </Button>
-      </Stack>
-    </Box>
+    <DashboardContainer>
+      {/* TARJETA DE BIENVENIDA CON EFECTO VIDRIO */}
+      <WelcomePaper elevation={6}>
+        <Title variant="h3" gutterBottom>
+          Panel de Administración
+        </Title>
+        
+        <EmailText variant="h5" color="textSecondary">
+          {currentUser?.email}
+        </EmailText>
+        
+        <StyledDivider />
+        
+        <DescriptionText variant="body1">
+          Bienvenido al centro de control del establecimiento. 
+          Como administrador, tienes permisos para gestionar las cuentas del personal docente 
+          y de coordinación, garantizando la integridad de los accesos al sistema.
+        </DescriptionText>
+        
+        <ActionStack direction="row" spacing={3}>
+          <ManagementButton 
+            variant="contained" 
+            size="large"
+            startIcon={<GroupIcon />}
+            onClick={() => navigate('/usuarios')}
+          >
+            Gestionar Usuarios y Roles
+          </ManagementButton>
+        </ActionStack>
+      </WelcomePaper>
+    </DashboardContainer>
   );
 };
-
