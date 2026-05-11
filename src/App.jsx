@@ -3,15 +3,29 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 
+import theme from './infrastructure/theme/theme';
+import { AuthProvider, useAuth } from './application/context/AuthContext';
+import { ProtectedRoute } from './presentation/routes/ProtectedRoute';
+import { Unauthorized } from './presentation/routes/Unauthorized';
+import { LoginForm } from './presentation/modules/LoginModule/LoginForm';
+import { AdminDashboard } from './presentation/modules/AdminModule/AdminDashboard';
+import { CoordinadorDashboard } from './presentation/modules/TeacherModule/CoordinadorDashboard';
+import { ProfesorDashboard } from './presentation/modules/TeacherModule/ProfesorDashboard';
+import { UsuariosTable } from './presentation/modules/UsuariosModule/UsuariosTable';
+import { AlumnosTable } from './presentation/modules/AlumnosModule/AlumnosTable';
+import { CursosTable } from './presentation/modules/CursosModule/CursosTable';
+import { AlumnosCursoView } from './presentation/modules/AlumnosCursoModule/AlumnosCursoView';
+import { Navbar } from './presentation/components/Navbar';
+
 const AuthRedirect = () => {
   const { currentUser, isAdmin, isCoordinador } = useAuth();
-  
+
   if (!currentUser) return <LoginForm />;
-  
+
   // Redireccion por roles
   if (isAdmin()) return <Navigate to="/admin" replace />;
   if (isCoordinador()) return <Navigate to="/coordinador" replace />;
-  
+
   return <Navigate to="/profesor" replace />;
 };
 
@@ -21,13 +35,13 @@ function App() {
       <CssBaseline />
       <AuthProvider>
         <BrowserRouter>
-          <Box sx={{ 
-            minHeight: '100vh', 
+          <Box sx={{
+            minHeight: '100vh',
             background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
             pb: 4 // Padding inferior
           }}>
             <Navbar />
-            
+
             <Routes>
               <Route path="/" element={<AuthRedirect />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
