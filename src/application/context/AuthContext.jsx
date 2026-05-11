@@ -18,9 +18,10 @@ export const AuthProvider = ({ children }) => {
           const todosLosUsuarios = await usuarioRepository.getAll();
           const datosUsuario = todosLosUsuarios.find(u => u.email === user.email);
           
-          // Asignacion de rol jerarquico
-          const realRole = datosUsuario ? datosUsuario.rol : 
+          // Normalización de roles a mayúsculas para consistencia con la lógica del frontend
+          const rawRole = datosUsuario ? datosUsuario.rol : 
                           (user.email === 'admin@test.com' ? 'ADMIN' : 'DOCENTE');
+          const realRole = rawRole?.toUpperCase();
 
           // Actualizacion estado global
           setCurrentUser({ 

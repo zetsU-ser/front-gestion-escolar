@@ -13,7 +13,7 @@ import {
   SaveButton
 } from './UsuarioFormDialog.styles';
 
-const TIPOS_USUARIO = ['ADMIN', 'DOCENTE', 'ESTUDIANTE', 'COORDINADOR'];
+const TIPOS_USUARIO = ['DOCENTE', 'COORDINADOR'];
 
 const estadoInicial = {
   nombre: '',
