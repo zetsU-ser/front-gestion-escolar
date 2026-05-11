@@ -14,13 +14,7 @@ import {
   ManagementButton 
 } from './AdminDashboard.styles';
 
-/**
- * COMPONENTE: AdminDashboard
- * Punto de entrada para el rol ADMINISTRADOR.
- * Su función principal es la gestión de usuarios (Cuentas de sistema).
- */
 export const AdminDashboard = () => {
-  // --- CONSUMO DE CONTEXTO ---
   // Obtenemos la información de sesión para personalizar el saludo
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();

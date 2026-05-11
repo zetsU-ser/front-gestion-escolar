@@ -13,12 +13,6 @@ import {
   SaveButton
 } from './UsuarioFormDialog.styles';
 
-/**
- * COMPONENTE: UsuarioFormDialog
- * Modal que captura los datos para la creación o edición de un usuario.
- * Realiza validación de RUT en el cliente.
- */
-
 const TIPOS_USUARIO = ['ADMIN', 'DOCENTE', 'ESTUDIANTE', 'COORDINADOR'];
 
 const estadoInicial = {
@@ -31,15 +25,12 @@ const estadoInicial = {
 };
 
 export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) => {
-  // --- GESTIÓN DE ESTADO LOCAL ---
 
   // Mantiene los valores de los inputs del formulario
   const [form, setForm] = useState(estadoInicial);
 
   // Almacena el mensaje de error de validación del RUT
   const [errorRut, setErrorRut] = useState('');
-
-  // Sincroniza el formulario cuando el componente recibe un usuario para editar
   useEffect(() => {
     if (usuarioEditar) {
       setForm({ ...usuarioEditar, password: '' }); // No mostramos el hash de la contraseña
@@ -48,7 +39,6 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
     }
   }, [usuarioEditar, open]);
 
-  // --- MANEJADORES ---
 
   const handleChange = (e) => {
     const { name, value } = e.target;

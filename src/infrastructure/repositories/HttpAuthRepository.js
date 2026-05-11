@@ -1,23 +1,13 @@
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 
-/**
- * CLASE: HttpAuthRepository
- * Implementación de AuthRepository utilizando Firebase como proveedor de identidad.
- */
 export class HttpAuthRepository {
-  /**
-   * Autentica a un usuario con su proveedor (Firebase).
-   * @param {string} email 
-   * @param {string} password 
-   * @returns {Promise<Object>} Usuario de Firebase.
-   */
   async login(email, password) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       return userCredential.user;
     } catch (error) {
-      // Mapeo de errores de Firebase para mensajes más amigables
+      // Normalizamos errores de Firebase para la UI
       if (error.code === 'auth/invalid-credential') {
         throw new Error('El correo o la contraseña son incorrectos.');
       }
@@ -28,9 +18,6 @@ export class HttpAuthRepository {
     }
   }
 
-  /**
-   * Cierra la sesión activa en el cliente.
-   */
   async logout() {
     try {
       await signOut(auth);

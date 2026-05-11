@@ -12,11 +12,6 @@ import {
   SaveButton 
 } from './AlumnoFormDialog.styles';
 
-/**
- * COMPONENTE: AlumnoFormDialog
- * Formulario especializado para capturar datos de estudiantes y sus apoderados.
- */
-
 const estadoInicial = {
   nombre: '',
   apellido: '',
@@ -27,12 +22,9 @@ const estadoInicial = {
 };
 
 export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => {
-  // --- GESTIÓN DE ESTADO LOCAL ---
   
   // Estado que agrupa todos los campos del alumno
   const [form, setForm] = useState(estadoInicial);
-
-  // Sincronización: Si recibimos un objeto para editar, poblamos el formulario.
   // De lo contrario, lo limpiamos al estado inicial.
   useEffect(() => {
     if (alumnoEditar) {
@@ -42,7 +34,6 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
     }
   }, [alumnoEditar, open]);
 
-  // --- MANEJADORES ---
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -9,33 +9,26 @@ import {
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useLogin } from '../../../application/use-cases/useLogin';
-import { 
-  LoginPaper, 
-  StyledAvatar, 
-  TitleText, 
-  SubtitleText, 
-  StyledAlert, 
-  FormBox, 
-  SubmitButton, 
-  FooterText 
+import {
+  LoginPaper,
+  StyledAvatar,
+  TitleText,
+  SubtitleText,
+  StyledAlert,
+  FormBox,
+  SubmitButton,
+  FooterText
 } from './LoginForm.styles';
 
-/**
- * COMPONENTE: LoginForm
- * Maneja el acceso al sistema validando credenciales contra Firebase 
- * y obteniendo el rol desde el microservicio.
- */
 export const LoginForm = () => {
-  // --- HOOKS Y CONTEXTO ---
   const { login, loading, error } = useLogin();
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // --- ESTADO LOCAL ---
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Sincronización: Redirección automática si ya hay una sesión activa con rol definido.
+  // Redireccion automatica si hay sesion activa
   useEffect(() => {
     if (currentUser && currentUser.role) {
       const role = currentUser.role.toLowerCase();
@@ -45,13 +38,11 @@ export const LoginForm = () => {
     }
   }, [currentUser, navigate]);
 
-  // --- MANEJADOR DE ENVÍO ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await login(email, password);
     } catch (err) {
-      // El error se captura y se muestra a través del estado 'error' del hook useLogin
       console.error("Fallo de autenticación:", err);
     }
   };
@@ -62,7 +53,7 @@ export const LoginForm = () => {
         <StyledAvatar>
           <LockOutlinedIcon fontSize="large" />
         </StyledAvatar>
-        
+
         <TitleText component="h1" variant="h4">
           Bienvenido
         </TitleText>
@@ -70,7 +61,6 @@ export const LoginForm = () => {
           Ingresa tus credenciales institucionales
         </SubtitleText>
 
-        {/* MENSAJE DE ERROR: Visualización centralizada de fallos de red o credenciales */}
         {error && (
           <StyledAlert severity="error">
             {error}
@@ -104,7 +94,7 @@ export const LoginForm = () => {
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
           />
-          
+
           <SubmitButton
             type="submit"
             fullWidth
@@ -116,7 +106,7 @@ export const LoginForm = () => {
           </SubmitButton>
         </FormBox>
       </LoginPaper>
-      
+
       <FooterText variant="body2" color="textSecondary" align="center">
         © {new Date().getFullYear()} Colegio - Sistema de Gestión Académica
       </FooterText>

@@ -16,13 +16,7 @@ import {
   PrimaryButton 
 } from './CoordinadorDashboard.styles';
 
-/**
- * COMPONENTE: CoordinadorDashboard
- * Punto de entrada para el rol COORDINADOR.
- * Centraliza la gestión académica: Alumnos y Cursos.
- */
 export const CoordinadorDashboard = () => {
-  // --- CONSUMO DE CONTEXTO ---
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 

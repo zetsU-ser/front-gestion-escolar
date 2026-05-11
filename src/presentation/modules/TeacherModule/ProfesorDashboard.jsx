@@ -15,13 +15,7 @@ import {
   CaptionText 
 } from './ProfesorDashboard.styles';
 
-/**
- * COMPONENTE: ProfesorDashboard
- * Punto de entrada para el personal docente.
- * Permite visualizar la carga académica y el registro de clases.
- */
 export const ProfesorDashboard = () => {
-  // --- CONSUMO DE CONTEXTO ---
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 

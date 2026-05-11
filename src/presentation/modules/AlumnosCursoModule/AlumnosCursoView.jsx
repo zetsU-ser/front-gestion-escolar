@@ -34,36 +34,20 @@ import {
 } from './AlumnosCursoView.styles';
 
 export const AlumnosCursoView = () => {
-  // --- PARÁMETROS Y NAVEGACIÓN ---
-  const { cursoId } = useParams(); // ID obtenido de la URL (p.ej: /alumnos-curso/5)
+  const { cursoId } = useParams();
   const navigate = useNavigate();
 
-  // --- GESTIÓN DE ESTADO ---
-  // Datos del curso actual (Nivel y Letra) para el encabezado
   const [curso, setCurso] = useState(null);
-  
-  // Lista de alumnos que ya están matriculados en este curso
   const [asignaciones, setAsignaciones] = useState([]);
-  
-  // Control de apertura del selector de nuevos alumnos
   const [openSelector, setOpenSelector] = useState(false);
-  
-  // Hook que trae todos los alumnos del sistema para poder seleccionarlos
   const { alumnos } = useAlumnos();
 
-  // --- LÓGICA DE NEGOCIO ---
-  /**
-   * Carga la información del curso y la lista de alumnos asignados.
-   * Nota: Debido a limitaciones del backend, el filtrado se realiza en el frontend.
-   */
   const cargarDatos = async () => {
     try {
-      // 1. Obtener datos del curso para el título
       const cursos = await cursoRepository.getAll();
       const current = cursos.find(c => c.id === parseInt(cursoId));
       setCurso(current);
 
-      // 2. Obtener asignaciones y filtrar por curso en el cliente
       const lista = await alumnoCursoRepository.getByCurso(cursoId);
       setAsignaciones(Array.isArray(lista) ? lista : []);
     } catch (err) {
@@ -71,48 +55,36 @@ export const AlumnosCursoView = () => {
     }
   };
 
-  // Efecto inicial: Carga los datos cuando el componente se monta o cambia el ID
   useEffect(() => {
     cargarDatos();
   }, [cursoId]);
 
-  /**
-   * Procesa la matrícula de un alumno en el curso actual.
-   */
   const handleAsignar = async (alumnoId) => {
     try {
       await alumnoCursoRepository.asignar({
         alumno: { id: alumnoId },
         curso: { id: parseInt(cursoId) }
       });
-      setOpenSelector(false); // Cierra el buscador
-      cargarDatos(); // Refresca la tabla
+      setOpenSelector(false); // Cierre buscador
+      cargarDatos(); // Actualizacion tabla
     } catch (err) {
       alert("Error al asignar: " + err.message);
     }
   };
 
-  /**
-   * Elimina la asignación (matrícula) de un alumno del curso.
-   */
   const handleDesvincular = async (id) => {
     if (window.confirm("¿Deseas quitar al alumno de este curso?")) {
       await alumnoCursoRepository.desvincular(id);
       cargarDatos();
     }
   };
-
-  // Renderizado de seguridad mientras se obtienen los datos
   if (!curso) return <Typography sx={{ p: 4 }}>Cargando información del curso...</Typography>;
 
   return (
     <MainContainer>
-      {/* NAVEGACIÓN SUPERIOR */}
       <BackButton startIcon={<ArrowBack />} onClick={() => navigate('/cursos')}>
         Volver a Cursos
       </BackButton>
-
-      {/* CABECERA DINÁMICA */}
       <HeaderPaper elevation={2}>
         <HeaderStack direction="row">
           <Box>
@@ -130,8 +102,6 @@ export const AlumnosCursoView = () => {
           </Button>
         </HeaderStack>
       </HeaderPaper>
-
-      {/* TABLA DE ALUMNOS MATRICULADOS */}
       <TablePaper component={Paper}>
         <Table>
           <StyledTableHead>
@@ -166,8 +136,6 @@ export const AlumnosCursoView = () => {
           </TableBody>
         </Table>
       </TablePaper>
-
-      {/* DIALOG SELECTOR: Solo muestra alumnos que NO están en el curso actual */}
       <Dialog open={openSelector} onClose={() => setOpenSelector(false)} fullWidth maxWidth="xs">
         <DialogTitle>Seleccionar Alumno para Matricular</DialogTitle>
         <DialogContent dividers>
@@ -185,7 +153,6 @@ export const AlumnosCursoView = () => {
                   <Divider />
                 </Box>
               ))}
-            {/* Mensaje cuando todos los alumnos ya están matriculados */}
             {alumnos.filter(a => !asignaciones.some(asig => asig.alumno?.id === a.id)).length === 0 && (
               <Typography sx={{ p: 2, textAlign: 'center' }} color="textSecondary">
                 No hay más alumnos disponibles para asignar.

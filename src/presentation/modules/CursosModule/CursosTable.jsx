@@ -22,23 +22,16 @@ import {
 } from './CursosTable.styles';
 
 export const CursosTable = () => {
-  // --- GESTIÓN DE ESTADO Y DATOS ---
-  // Hook personalizado que centraliza la lógica de negocio y peticiones al backend
   const { cursos, loading, crear, eliminar } = useCursos();
-  
-  // Estado local para controlar la visibilidad del modal de creación
   const [open, setOpen] = useState(false);
   
   // Hook de navegación para redirigir a la vista detallada de alumnos por curso
   const navigate = useNavigate();
-
-  // Renderizado condicional durante la carga inicial de datos
   if (loading) return <Typography>Cargando cursos...</Typography>;
 
   return (
     <MainContainer>
-      {/* ENCABEZADO: Título y Acción Principal */}
-      <HeaderContainer>
+<HeaderContainer>
         <TitleText variant="h4">
           Gestión de Cursos
         </TitleText>
@@ -50,9 +43,7 @@ export const CursosTable = () => {
           Nuevo Curso
         </AddButton>
       </HeaderContainer>
-
-      {/* REJILLA DE CURSOS: Se muestran como tarjetas con efecto */}
-      <Grid container spacing={3}>
+<Grid container spacing={3}>
         {cursos.length === 0 ? (
           // Estado vacío: Cuando no hay registros en la base de datos
           <Grid item sx={{ width: '100%' }}>
@@ -71,9 +62,7 @@ export const CursosTable = () => {
                   <CourseIdText color="textSecondary">
                     ID: {curso.id}
                   </CourseIdText>
-                  
-                  {/* ACCIONES POR CURSO */}
-                  <CardActionsContainer>
+<CardActionsContainer>
                     <Button
                       startIcon={<GroupsIcon />}
                       size="small"
