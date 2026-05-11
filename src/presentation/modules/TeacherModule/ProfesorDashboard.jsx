@@ -1,24 +1,67 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Typography } from '@mui/material';
 import { useContext } from 'react';
 import { AuthContext } from '../../../application/context/AuthContext';
-import { authRepository } from '../../../infrastructure/repositories/HttpAuthRepository';
 import { useNavigate } from 'react-router-dom';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import ClassIcon from '@mui/icons-material/Class';
+import { 
+  DashboardContainer, 
+  StyledPaper, 
+  Title, 
+  StyledDivider, 
+  DescriptionText, 
+  ActionStack, 
+  ActionButton, 
+  CaptionText 
+} from './ProfesorDashboard.styles';
 
+/**
+ * COMPONENTE: ProfesorDashboard
+ * Punto de entrada para el personal docente.
+ * Permite visualizar la carga académica y el registro de clases.
+ */
 export const ProfesorDashboard = () => {
+  // --- CONSUMO DE CONTEXTO ---
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await authRepository.logout();
-    navigate('/');
-  };
-
   return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <Typography variant="h3" color="primary">Panel de Profesor</Typography>
-      <Typography variant="h6" sx={{ mt: 2 }}>Bienvenido, {currentUser?.email}</Typography>
-      <Typography variant="body1">Rol detectado: {currentUser?.role}</Typography>
-      <Button variant="contained" color="secondary" sx={{ mt: 4 }} onClick={handleLogout}>Cerrar Sesión</Button>
-    </Box>
+    <DashboardContainer>
+      <StyledPaper elevation={4}>
+        <Title variant="h3" gutterBottom>
+          Portal Docente
+        </Title>
+        
+        <Typography variant="h6" color="textSecondary">
+          Bienvenido, {currentUser?.nombre || currentUser?.email}
+        </Typography>
+        
+        <StyledDivider />
+
+        <DescriptionText variant="body1">
+          Has ingresado al sistema de gestión académica. 
+          Aquí podrás consultar tus cursos asignados, registrar asistencia y subir calificaciones.
+        </DescriptionText>
+
+        <ActionStack direction="row" spacing={2}>
+          <ActionButton 
+            variant="outlined" 
+            startIcon={<ClassIcon />}
+          >
+            Mis Cursos
+          </ActionButton>
+          <ActionButton 
+            variant="outlined" 
+            startIcon={<AssignmentIndIcon />}
+          >
+            Mi Carga Académica
+          </ActionButton>
+        </ActionStack>
+        
+        <CaptionText variant="caption" display="block">
+          Módulo en desarrollo - Funcionalidades de aula próximamente disponibles.
+        </CaptionText>
+      </StyledPaper>
+    </DashboardContainer>
   );
 };

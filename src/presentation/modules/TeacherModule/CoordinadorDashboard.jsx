@@ -1,24 +1,70 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Typography } from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import PeopleIcon from '@mui/icons-material/People';
 import { useContext } from 'react';
 import { AuthContext } from '../../../application/context/AuthContext';
-import { authRepository } from '../../../infrastructure/repositories/HttpAuthRepository';
 import { useNavigate } from 'react-router-dom';
+import { 
+  DashboardContainer, 
+  DashboardPaper, 
+  TitleText, 
+  EmailText, 
+  StyledDivider, 
+  DescriptionText, 
+  ActionStack, 
+  ActionButton, 
+  PrimaryButton 
+} from './CoordinadorDashboard.styles';
 
+/**
+ * COMPONENTE: CoordinadorDashboard
+ * Punto de entrada para el rol COORDINADOR.
+ * Centraliza la gestión académica: Alumnos y Cursos.
+ */
 export const CoordinadorDashboard = () => {
+  // --- CONSUMO DE CONTEXTO ---
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await authRepository.logout();
-    navigate('/');
-  };
-
   return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
-      <Typography variant="h3" color="primary">Panel de Coordinador</Typography>
-      <Typography variant="h6" sx={{ mt: 2 }}>Bienvenido, {currentUser?.email}</Typography>
-      <Typography variant="body1">Rol detectado: {currentUser?.role}</Typography>
-      <Button variant="contained" color="secondary" sx={{ mt: 4 }} onClick={handleLogout}>Cerrar Sesión</Button>
-    </Box>
+    <DashboardContainer>
+      <DashboardPaper elevation={6}>
+        <TitleText variant="h3" gutterBottom>
+          Gestión de Coordinación
+        </TitleText>
+
+        <EmailText variant="h5" color="textSecondary">
+          {currentUser?.email}
+        </EmailText>
+
+        <StyledDivider />
+
+        <DescriptionText variant="body1">
+          Bienvenido al centro de planificación. Como coordinador, tienes la responsabilidad
+          de estructurar los niveles académicos y asegurar que cada estudiante esté
+          correctamente matriculado en su curso.
+        </DescriptionText>
+
+        <ActionStack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+          <PrimaryButton
+            variant="contained"
+            size="large"
+            startIcon={<PeopleIcon />}
+            onClick={() => navigate('/alumnos')}
+          >
+            Fichas de Alumnos
+          </PrimaryButton>
+          <ActionButton
+            variant="contained"
+            size="large"
+            color="secondary"
+            startIcon={<SchoolIcon />}
+            onClick={() => navigate('/cursos')}
+          >
+            Configurar Cursos
+          </ActionButton>
+        </ActionStack>
+      </DashboardPaper>
+    </DashboardContainer>
   );
 };
