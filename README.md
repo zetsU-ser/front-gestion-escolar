@@ -4,13 +4,13 @@ Este proyecto corresponde a la interfaz de usuario para el sistema de gestión a
 
 ## preparar el entorno
 
-Primero iniciamos la terminal y comprobamos si tenemos instalado node y npm (se recomienda Node v18+):
+Primero iniciamos la terminal y comprobamos si tenemos instalado node y pnpm (se recomienda Node v18+):
 
 Bash
 
 ```
 node -v 
-npm -v
+pnpm -v
 ```
 
 en caso de tenerlos instalados esto debería retornar algo similar a esto:
@@ -20,17 +20,18 @@ Bash
 ```
 user@pop-os:~$ node -v
 v18.19.1
-user@pop-os:~$ npm -v
-9.2.0
+user@pop-os:~$ pnpm -v
+11.5.0
 ```
 
-si no están instalados es necesario ejecutar:
+si no están instalados es necesario ejecutar (puedes habilitar pnpm mediante corepack):
 
 Bash
 
 ```
 sudo apt update 
-sudo apt install nodejs npm
+sudo apt install nodejs
+corepack enable pnpm
 ```
 
 ## configuración del proyecto
@@ -40,7 +41,7 @@ Una vez que tenemos el entorno listo, entramos a la carpeta del frontend y desca
 Bash
 
 ```
-user@pop-os:~/Escritorio/FullStack_3/EV2/Frontend/front-gestion-escolar$ npm install
+user@pop-os:~/Escritorio/FullStack_3/EV2/Frontend/front-gestion-escolar$ pnpm install
 ```
 
 ## ejecución del sistema
@@ -50,7 +51,7 @@ Para levantar el servidor de desarrollo y ver la aplicación funcionando, ejecut
 Bash
 
 ```
-user@pop-os:~/Escritorio/FullStack_3/EV2/Frontend/front-gestion-escolar$ npm run dev
+user@pop-os:~/Escritorio/FullStack_3/EV2/Frontend/front-gestion-escolar$ pnpm dev
 ```
 
 Esto nos entregará una URL (usualmente `http://localhost:5173`) para abrir en el navegador.
