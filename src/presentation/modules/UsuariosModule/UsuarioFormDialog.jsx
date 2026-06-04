@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,9 @@ import {
   Button,
   MenuItem,
 } from '@mui/material';
-import { validarRut } from '../../../application/utils/validarRut';
+import { useForm } from '../../../application/hooks/useForm';
+import { validateSchema } from '../../../application/utils/validateSchema';
+import { getUsuarioValidationSchema } from './usuarioValidationSchema';
 import {
   StyledDialogTitle,
   StyledDialogActions,
@@ -26,98 +28,32 @@ const estadoInicial = {
 
 export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) => {
 
-  // Mantiene los valores de los inputs del formulario
-  const [form, setForm] = useState(estadoInicial);
+  const {
+    form,
+    errors,
+    handleFieldChange: handleChange,
+    reset,
+    handleSubmit
+  } = useForm(estadoInicial, (valores) => validateSchema(getUsuarioValidationSchema(!!usuarioEditar), valores));
 
-  // Almacena el mensaje de error de validación del RUT
-  const [errors, setErrors] = useState({});
   useEffect(() => {
     if (usuarioEditar) {
-      setForm({ ...usuarioEditar, password: '' }); // No mostramos el hash de la contraseña
+      reset({ ...usuarioEditar, password: '' });
     } else {
-      setForm(estadoInicial);
+      reset(estadoInicial);
     }
-    setErrors({});
   }, [usuarioEditar, open]);
 
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-
-    // Limpieza reactiva del error de campo mientras el usuario escribe
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Nombre
-    if (!form.nombre || !form.nombre.trim()) {
-      newErrors.nombre = 'El nombre es obligatorio';
-    } else if (form.nombre.trim().length < 2) {
-      newErrors.nombre = 'El nombre debe tener al menos 2 caracteres';
-    }
-
-    // Apellido
-    if (!form.apellido || !form.apellido.trim()) {
-      newErrors.apellido = 'El apellido es obligatorio';
-    } else if (form.apellido.trim().length < 2) {
-      newErrors.apellido = 'El apellido debe tener al menos 2 caracteres';
-    }
-
-    // Email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!form.email || !form.email.trim()) {
-      newErrors.email = 'El correo electrónico es obligatorio';
-    } else if (!emailRegex.test(form.email.trim())) {
-      newErrors.email = 'Formato de correo electrónico inválido';
-    }
-
-    // Password
-    if (!usuarioEditar) {
-      if (!form.password || form.password.length < 6) {
-        newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
-      }
-    } else {
-      if (form.password && form.password.length < 6) {
-        newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
-      }
-    }
-
-    // RUT
-    if (!form.rut || !form.rut.trim()) {
-      newErrors.rut = 'El RUT es obligatorio';
-    } else if (!validarRut(form.rut)) {
-      newErrors.rut = 'RUT inválido. Formato requerido: 12345678-9';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    // Aseguramos consistencia en el ROL para el Backend (Enums en Java suelen ser UPPERCASE)
+  const onSubmit = (formData) => {
     onGuardar({
-      ...form,
-      rol: form.rol.toUpperCase()
+      ...formData,
+      rol: formData.rol.toUpperCase()
     });
-
-    setForm(estadoInicial);
-    setErrors({});
+    reset(estadoInicial);
   };
 
   const handleClose = () => {
-    setForm(estadoInicial);
-    setErrors({});
+    reset(estadoInicial);
     onClose();
   };
 
@@ -127,7 +63,7 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
         {usuarioEditar ? 'Editar Usuario' : 'Agregar Nuevo Usuario'}
       </StyledDialogTitle>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <TextField
             margin="normal"
@@ -160,7 +96,7 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
             type="email"
             value={form.email}
             onChange={handleChange}
-            disabled={!!usuarioEditar} // El email suele ser el identificador en Firebase, mejor no cambiarlo aquí
+            disabled={!!usuarioEditar} // identificador en Firebase, mejor no cambiarlo aquí
             error={!!errors.email}
             helperText={errors.email}
           />
