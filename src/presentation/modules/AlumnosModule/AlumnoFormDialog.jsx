@@ -19,6 +19,7 @@ const estadoInicial = {
   nombre: '',
   apellido: '',
   rut: '',
+  edad: '',
   nombreApoderado: '',
   emailApoderado: '',
   telefonoApoderado: ''
@@ -36,7 +37,8 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
 
   useEffect(() => {
     if (alumnoEditar) {
-      reset(alumnoEditar);
+      // Merge con estadoInicial para evitar campos undefined en registros legacy
+      reset({ ...estadoInicial, ...alumnoEditar });
     } else {
       reset(estadoInicial);
     }
@@ -74,17 +76,33 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
                 helperText={errors.apellido}
               />
             </Stack>
-            <TextField
-              label="RUT del Estudiante"
-              name="rut"
-              placeholder="12345678-9"
-              fullWidth
-              required
-              value={form.rut}
-              onChange={handleChange}
-              error={!!errors.rut}
-              helperText={errors.rut}
-            />
+            <Stack direction="row" spacing={2}>
+              <TextField
+                label="RUT del Estudiante"
+                name="rut"
+                placeholder="12345678-9"
+                fullWidth
+                required
+                value={form.rut}
+                onChange={handleChange}
+                error={!!errors.rut}
+                helperText={errors.rut}
+              />
+              <TextField
+                label="Edad"
+                name="edad"
+                type="number"
+                fullWidth
+                required
+                value={form.edad}
+                onChange={handleChange}
+                error={!!errors.edad}
+                helperText={errors.edad}
+                slotProps={{
+                  htmlInput: { min: 4, max: 20 }
+                }}
+              />
+            </Stack>
 
             {/* DATOS DEL APODERADO (Requerido para contacto legal) */}
             <TextField
