@@ -17,7 +17,8 @@ export const AuthProvider = ({ children }) => {
       if (user) {
         try {
           setAuthError(null);
-          const todosLosUsuarios = await usuarioRepository.getAll();
+          const token = await user.getIdToken();
+          const todosLosUsuarios = await usuarioRepository.getAll(token);
 
           // Comparación insensible a mayúsculas para tolerar variaciones en Neon
           const emailNormalizado = user.email?.toLowerCase();
