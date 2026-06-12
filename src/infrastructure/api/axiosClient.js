@@ -2,7 +2,8 @@ import axios from 'axios';
 import { auth } from '../firebase/firebaseConfig';
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  // Delegamos el ruteo real al proxy o URL base inyectada
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
