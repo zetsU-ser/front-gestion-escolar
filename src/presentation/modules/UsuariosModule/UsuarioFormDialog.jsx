@@ -23,7 +23,8 @@ const estadoInicial = {
   email: '',
   rut: '',
   rol: 'DOCENTE',
-  password: ''
+  password: '',
+  asignatura_id: ''
 };
 
 export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) => {
@@ -143,6 +144,27 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
               </MenuItem>
             ))}
           </TextField>
+
+          {form.rol === 'DOCENTE' && (
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              select
+              label="Asignatura Base"
+              name="asignatura_id"
+              value={form.asignatura_id || ''}
+              onChange={handleChange}
+              error={!!errors.asignatura_id}
+              helperText={errors.asignatura_id}
+            >
+              <MenuItem value={1}>Matemáticas</MenuItem>
+              <MenuItem value={2}>Lenguaje y Comunicación</MenuItem>
+              <MenuItem value={3}>Historia y Geografía</MenuItem>
+              <MenuItem value={4}>Ciencias Naturales</MenuItem>
+              <MenuItem value={5}>Inglés</MenuItem>
+            </TextField>
+          )}
         </DialogContent>
 
         <StyledDialogActions>

@@ -17,6 +17,15 @@ export const cursoRepository = {
 };
 
 export const alumnoCursoRepository = {
+  getAll: async () => {
+    try {
+      const response = await axiosClient.get('/alumnosCurso');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      return [];
+    }
+  },
+
   getByCurso: async (cursoId) => {
     try {
       const response = await axiosClient.get('/alumnosCurso');

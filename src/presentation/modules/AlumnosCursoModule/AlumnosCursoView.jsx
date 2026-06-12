@@ -17,6 +17,7 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  TextField,
 } from '@mui/material';
 import { ArrowBack, PersonAdd, Delete } from '@mui/icons-material';
 import { alumnoCursoRepository, cursoRepository } from '../../../infrastructure/repositories/HttpCursosRepository';
@@ -40,6 +41,7 @@ export const AlumnosCursoView = () => {
   const [curso, setCurso] = useState(null);
   const [asignaciones, setAsignaciones] = useState([]);
   const [openSelector, setOpenSelector] = useState(false);
+  const [edadFiltro, setEdadFiltro] = useState('');
   const { alumnos } = useAlumnos();
 
   const cargarDatos = async () => {
@@ -136,18 +138,29 @@ export const AlumnosCursoView = () => {
           </TableBody>
         </Table>
       </TablePaper>
-      <Dialog open={openSelector} onClose={() => setOpenSelector(false)} fullWidth maxWidth="xs">
+      <Dialog open={openSelector} onClose={() => setOpenSelector(false)} fullWidth maxWidth="sm">
         <DialogTitle>Seleccionar Alumno para Matricular</DialogTitle>
         <DialogContent dividers>
+          <TextField
+            label="Filtrar por Edad"
+            type="number"
+            fullWidth
+            size="small"
+            value={edadFiltro}
+            onChange={(e) => setEdadFiltro(e.target.value)}
+            sx={{ mb: 2 }}
+            placeholder="Ej: 14"
+          />
           <List>
             {alumnos
               .filter(a => !asignaciones.some(asig => asig.alumno?.id === a.id))
+              .filter(a => edadFiltro === '' || Number(a.edad) === Number(edadFiltro))
               .map((alumno) => (
                 <Box key={alumno.id}>
                   <ListItemButton onClick={() => handleAsignar(alumno.id)}>
                     <ListItemText 
                       primary={`${alumno.nombre} ${alumno.apellido}`} 
-                      secondary={`RUT: ${alumno.rut}`}
+                      secondary={`RUT: ${alumno.rut} | Edad: ${alumno.edad || 'N/A'}`}
                     />
                   </ListItemButton>
                   <Divider />

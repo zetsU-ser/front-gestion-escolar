@@ -19,6 +19,12 @@ export const alumnoValidationSchema = {
     if (!validarRut(value)) return 'RUT inválido. Formato requerido: 12345678-9';
     return null;
   },
+  edad: (value) => {
+    if (!value || value === '') return 'La edad es obligatoria';
+    const edadNum = Number(value);
+    if (isNaN(edadNum) || edadNum < 4 || edadNum > 20) return 'La edad debe estar entre 4 y 20 años';
+    return null;
+  },
   nombreApoderado: (value) => {
     if (!value || !value.trim()) return 'El nombre del apoderado es obligatorio';
     if (!validarNombre(value)) return 'El nombre debe tener entre 2 y 50 caracteres y solo contener letras, espacios, guiones o apóstrofes';
