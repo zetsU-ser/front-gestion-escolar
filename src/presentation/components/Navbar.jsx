@@ -52,30 +52,53 @@ export const Navbar = () => {
             </NavButton>
 
             {isAdmin() && (
-              <NavButton
-                component={Link}
-                to="/usuarios"
-                color="inherit"
-              >
-                Personal
-              </NavButton>
+              <>
+                <NavButton
+                  component={Link}
+                  to="/admin/personal"
+                  color="inherit"
+                >
+                  Personal
+                </NavButton>
+                <NavButton
+                  component={Link}
+                  to="/admin/alumnos"
+                  color="inherit"
+                >
+                  Matricular Alumno
+                </NavButton>
+                <NavButton
+                  component={Link}
+                  to="/admin/mensajeria"
+                  color="inherit"
+                >
+                  Mensajería
+                </NavButton>
+              </>
             )}
 
             {isCoordinador() && (
               <>
                 <NavButton
                   component={Link}
-                  to="/alumnos"
-                  color="inherit"
-                >
-                  Matrículas
-                </NavButton>
-                <NavButton
-                  component={Link}
                   to="/cursos"
                   color="inherit"
                 >
-                  Cursos
+                  Gestión Académica
+                </NavButton>
+                <NavButton
+                  component={Link}
+                  to="/coordinador/carga-academica"
+                  color="inherit"
+                >
+                  Carga Académica
+                </NavButton>
+                <NavButton
+                  component={Link}
+                  to="/coordinador/mensajeria"
+                  color="inherit"
+                >
+                  Mensajería
                 </NavButton>
               </>
             )}
