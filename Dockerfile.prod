@@ -18,8 +18,9 @@ RUN pnpm run build
 # Etapa 2: Servidor Web Ultraligero (Nginx)
 FROM nginx:alpine
 
-# Borramos la configuración default de Nginx
+# Borramos la configuración default de Nginx y copiamos la nuestra
 RUN rm -rf /etc/nginx/conf.d/*
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copiamos la compilación estática desde el builder
 COPY --from=builder /app/dist /usr/share/nginx/html
