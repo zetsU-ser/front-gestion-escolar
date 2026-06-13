@@ -59,6 +59,11 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Conectar a Tailscale VPN
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
       - name: Conectar por SSH y Actualizar Contenedor
         uses: appleboy/ssh-action@v1.0.3
         with:
