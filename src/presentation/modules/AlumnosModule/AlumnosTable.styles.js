@@ -7,19 +7,15 @@ export const LoadingText = styled(Typography)(({ theme }) => ({
 
 export const MainContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
-}));
-
-export const HeaderContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: theme.spacing(3),
+  flexDirection: 'column',
+  minHeight: '80vh',
+  width: '100%',
+  maxWidth: '1200px',
+  margin: '0 auto',
 }));
 
-export const TitleText = styled(Typography)(({ theme }) => ({
-  fontWeight: 'bold',
-  color: theme.palette.primary.main,
-}));
+
 
 export const AddButton = styled(Button)(({ theme }) => ({
   borderRadius: '20px',

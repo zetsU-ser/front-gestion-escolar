@@ -1,87 +1,56 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GroupIcon from '@mui/icons-material/Group';
-import SchoolIcon from '@mui/icons-material/School';
-import { Send as SendIcon } from '@mui/icons-material';
 import { AuthContext } from '../../../application/context/AuthContext';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
+import { useCursos } from '../../../application/use-cases/useCursos';
 import { PanelDashboard } from '../../components/organisms/PanelDashboard';
-import { BotonAccion } from '../../components/atoms/BotonAccion';
+import { DetalleMetricasAdmin } from '../../components/organisms/DetalleMetricasAdmin';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
 import {
   DashboardContainer,
-  WelcomePaper,
-  Title,
-  EmailText,
-  StyledDivider,
-  DescriptionText,
-  ActionStack
+  StyledDivider
 } from './AdminDashboard.styles';
 
-/**
- * Página: PaginaHomeAdmin
- * Composición Atomic Design:
- *   Organismo → PanelDashboard (TarjetaMetrica[])
- *   Átomo    → BotonAccion (navegación a submódulos)
- */
 export const AdminDashboard = () => {
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const { alumnos } = useAlumnos();
   const { usuarios: personal } = useUsuarios();
+  const { cursos } = useCursos();
+  
+  // maneja el estado de la tabla interactiva
+  const [metricaSeleccionada, setMetricaSeleccionada] = useState(null);
 
   const metricas = [
-    { valor: personal.length, titulo: 'Personal Registrado' },
-    { valor: alumnos.length, titulo: 'Alumnos Matriculados' },
+    { id: 'personal', valor: personal.length, titulo: 'Personal Registrado' },
+    { id: 'cursos', valor: cursos.length, titulo: 'Cursos Registrados' },
+    { id: 'alumnos', valor: alumnos.length, titulo: 'Alumnos Matriculados' },
   ];
 
   return (
     <DashboardContainer>
-      <WelcomePaper elevation={6}>
-        <Title variant="h3" gutterBottom>
-          Panel de Administración
-        </Title>
+      {/* muestra el encabezado de la página */}
+      <HeaderModulo 
+        titulo="Panel de Administración" 
+        correo={currentUser?.email}
+      />
 
-        <EmailText variant="h5" color="textSecondary">
-          {currentUser?.email}
-        </EmailText>
+      <StyledDivider />
 
-        <StyledDivider />
+      <PanelDashboard 
+        metricas={metricas} 
+        onSelectMetrica={(id) => setMetricaSeleccionada(id === metricaSeleccionada ? null : id)} 
+      />
 
-        {/* Organismo: PanelDashboard → TarjetaMetrica[] */}
-        <PanelDashboard metricas={metricas} />
-
-        <DescriptionText variant="body1">
-          Bienvenido al centro de control del establecimiento.
-          Como administrador, tienes permisos para gestionar las cuentas del personal docente
-          y de coordinación, garantizando la integridad de los accesos al sistema.
-        </DescriptionText>
-
-        {/* Átomos: BotonAccion × 3 */}
-        <ActionStack direction="row" spacing={2} sx={{ mt: 4, flexWrap: 'wrap', gap: 2 }}>
-          <BotonAccion
-            startIcon={<GroupIcon />}
-            onClick={() => navigate('/admin/personal')}
-          >
-            Registrar Personal
-          </BotonAccion>
-          <BotonAccion
-            color="secondary"
-            startIcon={<SchoolIcon />}
-            onClick={() => navigate('/admin/alumnos')}
-          >
-            Matricular Alumnos
-          </BotonAccion>
-          <BotonAccion
-            color="info"
-            startIcon={<SendIcon />}
-            onClick={() => navigate('/admin/mensajeria')}
-          >
-            Mensajería Global
-          </BotonAccion>
-        </ActionStack>
-      </WelcomePaper>
+      {/* muestra la tabla interactiva según la tarjeta clickeada */}
+      <DetalleMetricasAdmin 
+        metricaId={metricaSeleccionada} 
+        usuarios={personal} 
+        cursos={cursos} 
+        alumnos={alumnos} 
+      />
     </DashboardContainer>
   );
 };

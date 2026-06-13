@@ -1,29 +1,23 @@
 import { useState } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Paper,
-  IconButton,
+  Divider,
+  Box,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
+import { useAuth } from '../../../application/context/AuthContext';
 import { AlumnoFormDialog } from './AlumnoFormDialog';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { TablaAlumnosGlobal } from '../../components/organisms/TablaAlumnosGlobal';
 import {
   LoadingText,
   MainContainer,
-  HeaderContainer,
-  TitleText,
-  AddButton,
-  TablePaper,
-  StyledTableHeader,
-  HeaderCell,
-  EmptyRowCell
+  AddButton
 } from './AlumnosTable.styles';
 
 export const AlumnosTable = () => {
   const { alumnos, loading, crear, actualizar, eliminar } = useAlumnos();
+  const { currentUser } = useAuth();
 
   const [open, setOpen] = useState(false);
   const [alumnoEditar, setAlumnoEditar] = useState(null);
@@ -55,10 +49,15 @@ export const AlumnosTable = () => {
 
   return (
     <MainContainer>
-      <HeaderContainer>
-        <TitleText variant="h5">
-          Registro de Alumnos (Matrículas)
-        </TitleText>
+      {/* muestra el encabezado del módulo */}
+      <HeaderModulo 
+        titulo="Registro de Alumnos (Matrículas)" 
+        correo={currentUser?.email}
+      />
+
+      <Divider sx={{ mb: 4 }} /> {/* separador visual idéntico al dashboard */}
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <AddButton
           variant="contained"
           startIcon={<AddIcon />}
@@ -66,49 +65,14 @@ export const AlumnosTable = () => {
         >
           Registrar Nuevo Alumno
         </AddButton>
-      </HeaderContainer>
+      </Box>
 
-      <TablePaper component={Paper}>
-        <Table sx={{ minWidth: 650 }}>
-          <StyledTableHeader>
-            <TableRow>
-              <HeaderCell>RUT</HeaderCell>
-              <HeaderCell>Nombre Completo</HeaderCell>
-              <HeaderCell>Apoderado</HeaderCell>
-              <HeaderCell>Email Apoderado</HeaderCell>
-              <HeaderCell>Teléfono</HeaderCell>
-              <HeaderCell align="right">Acciones</HeaderCell>
-            </TableRow>
-          </StyledTableHeader>
-          <TableBody>
-            {alumnos.length === 0 ? (
-              <TableRow>
-                <EmptyRowCell colSpan={6} align="center">
-                  No hay alumnos registrados.
-                </EmptyRowCell>
-              </TableRow>
-            ) : (
-              alumnos.map((alumno) => (
-                <TableRow key={alumno.id} hover>
-                  <TableCell>{alumno.rut}</TableCell>
-                  <TableCell>{alumno.nombre} {alumno.apellido}</TableCell>
-                  <TableCell>{alumno.nombreApoderado}</TableCell>
-                  <TableCell>{alumno.emailApoderado}</TableCell>
-                  <TableCell>{alumno.telefonoApoderado}</TableCell>
-                  <TableCell align="right">
-                    <IconButton color="primary" onClick={() => handleOpen(alumno)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton color="error" onClick={() => eliminar(alumno.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TablePaper>
+      {/* Organismo: Tabla de Alumnos Atomizada */}
+      <TablaAlumnosGlobal
+        alumnos={alumnos}
+        onEdit={handleOpen}
+        onDelete={eliminar}
+      />
 
       <AlumnoFormDialog
         open={open}

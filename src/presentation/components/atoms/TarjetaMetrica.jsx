@@ -9,9 +9,11 @@ const MetricCard = styled(Paper)(({ theme }) => ({
   flex: 1,
   background: 'rgba(255,255,255,0.85)',
   backdropFilter: 'blur(8px)',
-  transition: 'transform 0.2s ease',
+  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+  cursor: 'pointer',
   '&:hover': {
     transform: 'translateY(-4px)',
+    boxShadow: theme.shadows[6],
   }
 }));
 
@@ -28,15 +30,11 @@ const MetricLabel = styled(Typography)(({ theme }) => ({
   marginTop: theme.spacing(0.5),
 }));
 
-/**
- * Átomo: TarjetaMetrica
- * Contenedor simple para mostrar un número y un título descriptivo.
- * Usado en: PanelDashboard (Home Coordinador, Home Administrador)
- */
-export const TarjetaMetrica = ({ valor, titulo, icono }) => (
-  <MetricCard elevation={2}>
-    {icono && <Typography sx={{ fontSize: '2rem', mb: 1 }}>{icono}</Typography>}
-    <MetricValue variant="h4">{valor}</MetricValue>
-    <MetricLabel variant="body2">{titulo}</MetricLabel>
+// define el componente TarjetaMetrica para mostrar un valor numérico
+export const TarjetaMetrica = ({ valor, titulo, icono, onClick }) => (
+  <MetricCard elevation={2} onClick={onClick}> {/* ejecuta onClick al presionar */}
+    {icono && <Typography sx={{ fontSize: '2rem', mb: 1 }}>{icono}</Typography>} {/* muestra icono si existe */}
+    <MetricValue variant="h4">{valor}</MetricValue> {/* muestra el valor numérico gigante */}
+    <MetricLabel variant="body2">{titulo}</MetricLabel> {/* muestra el título o descripción */}
   </MetricCard>
 );

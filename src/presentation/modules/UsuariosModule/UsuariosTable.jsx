@@ -1,35 +1,24 @@
 import { useState } from 'react';
 import {
   Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Paper,
   CircularProgress,
   Alert,
-  IconButton,
+  Divider
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
 import { useAuth } from '../../../application/context/AuthContext';
 import { UsuarioFormDialog } from './UsuarioFormDialog';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { TablaUsuariosGlobal } from '../../components/organisms/TablaUsuariosGlobal';
 import {
   LoadingContainer,
   MainContainer,
-  HeaderContainer,
-  TitleText,
-  AddButton,
-  TablePaper,
-  StyledTableHeader,
-  HeaderCell,
-  EmptyRowCell
+  AddButton
 } from './UsuariosTable.styles';
 
 export const UsuariosTable = ({ filtroTipo = null, titulo = 'Usuarios' }) => {
   const { usuarios, loading, error, crear, actualizar, eliminar } = useUsuarios(filtroTipo);
-  const { isAdmin, isCoordinador } = useAuth();
+  const { currentUser, isAdmin, isCoordinador } = useAuth();
   const puedeGestionar = isAdmin() || isCoordinador();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -68,59 +57,32 @@ export const UsuariosTable = ({ filtroTipo = null, titulo = 'Usuarios' }) => {
 
   return (
     <MainContainer>
-      <HeaderContainer>
-        <TitleText variant="h5">{titulo}</TitleText>
-        {puedeGestionar && (
+      {/* muestra el encabezado del módulo */}
+      <HeaderModulo 
+        titulo={titulo} 
+        correo={currentUser?.email}
+      />
+
+      <Divider sx={{ mb: 4 }} /> {/* separador visual idéntico al dashboard */}
+
+      {puedeGestionar && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
           <AddButton variant="contained" onClick={handleAgregar}>
             Nuevo Usuario
           </AddButton>
-        )}
-      </HeaderContainer>
+        </Box>
+      )}
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {errorGuardar && <Alert severity="error" sx={{ mb: 2 }}>{errorGuardar}</Alert>}
 
-      <TablePaper component={Paper}>
-        <Table>
-          <StyledTableHeader>
-            <TableRow>
-              <HeaderCell>Nombre</HeaderCell>
-              <HeaderCell>Email</HeaderCell>
-              <HeaderCell>Rol</HeaderCell>
-              <HeaderCell align="right">Acciones</HeaderCell>
-            </TableRow>
-          </StyledTableHeader>
-          <TableBody>
-            {usuarios.length === 0 ? (
-              <TableRow>
-                <EmptyRowCell colSpan={4} align="center">
-                  No hay usuarios registrados.
-                </EmptyRowCell>
-              </TableRow>
-            ) : (
-              usuarios.map((usuario) => (
-                <TableRow key={usuario.id}>
-                  <TableCell>{usuario.nombre} {usuario.apellido}</TableCell>
-                  <TableCell>{usuario.email}</TableCell>
-                  <TableCell>{usuario.rol}</TableCell>
-                  <TableCell align="right">
-                    {puedeGestionar && (
-                      <>
-                        <IconButton onClick={() => handleEditar(usuario)} color="primary">
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton onClick={() => eliminar(usuario.id)} color="error">
-                          <DeleteIcon />
-                        </IconButton>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TablePaper>
+      {/* Organismo: Tabla de Usuarios Atomizada */}
+      <TablaUsuariosGlobal
+        usuarios={usuarios}
+        onEdit={handleEditar}
+        onDelete={eliminar}
+        puedeGestionar={puedeGestionar}
+      />
 
       <UsuarioFormDialog
         open={dialogOpen}

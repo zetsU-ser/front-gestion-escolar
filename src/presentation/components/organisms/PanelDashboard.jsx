@@ -1,13 +1,7 @@
 import { Stack } from '@mui/material';
 import { TarjetaMetrica } from '../atoms/TarjetaMetrica';
 
-/**
- * Organismo: PanelDashboard
- * Grilla que contiene las tarjetas de métricas informativas.
- * Consume datos de conteo desde ms-gestion-academica.
- * Usado en: PaginaHomeCoordinador, PaginaHomeAdmin
- */
-export const PanelDashboard = ({ metricas = [] }) => (
+export const PanelDashboard = ({ metricas = [], onSelectMetrica }) => (
   <Stack
     direction={{ xs: 'column', sm: 'row' }}
     spacing={3}
@@ -19,6 +13,7 @@ export const PanelDashboard = ({ metricas = [] }) => (
         valor={m.valor}
         titulo={m.titulo}
         icono={m.icono}
+        onClick={() => onSelectMetrica && onSelectMetrica(m.id || m.titulo)}
       />
     ))}
   </Stack>
