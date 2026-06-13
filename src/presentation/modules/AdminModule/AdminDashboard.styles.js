@@ -5,9 +5,10 @@ export const DashboardContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
   minHeight: '80vh',
+  width: '100%',
+  maxWidth: '1200px',
+  margin: '0 auto',
 }));
 
 export const WelcomePaper = styled(Paper)(({ theme }) => ({

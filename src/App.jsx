@@ -40,13 +40,7 @@ function App() {
       <CssBaseline />
       <AuthProvider>
         <BrowserRouter>
-          <Box sx={{
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-            pb: 4 // Padding inferior
-          }}>
-            <Navbar />
-
+          <Navbar>
             <Routes>
               <Route path="/" element={<AuthRedirect />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
@@ -126,7 +120,7 @@ function App() {
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Box>
+          </Navbar>
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

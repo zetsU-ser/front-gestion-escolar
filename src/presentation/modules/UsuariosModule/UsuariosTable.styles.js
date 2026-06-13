@@ -8,19 +8,15 @@ export const LoadingContainer = styled(Box)(({ theme }) => ({
 
 export const MainContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
-}));
-
-export const HeaderContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: theme.spacing(2),
+  flexDirection: 'column',
+  minHeight: '80vh',
+  width: '100%',
+  maxWidth: '1200px',
+  margin: '0 auto',
 }));
 
-export const TitleText = styled(Typography)(({ theme }) => ({
-  fontWeight: 'bold',
-  color: theme.palette.primary.main,
-}));
+
 
 export const AddButton = styled(Button)(({ theme }) => ({
   borderRadius: '20px',
@@ -28,11 +24,11 @@ export const AddButton = styled(Button)(({ theme }) => ({
 
 export const TablePaper = styled(TableContainer)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: theme.shadows[3],
+  boxShadow: theme.shadows[4],
 }));
 
 export const StyledTableHeader = styled(TableHead)(({ theme }) => ({
-  backgroundColor: theme.palette.grey[100],
+  backgroundColor: theme.palette.primary.light,
 }));
 
 export const HeaderCell = styled(TableCell)(({ theme }) => ({
