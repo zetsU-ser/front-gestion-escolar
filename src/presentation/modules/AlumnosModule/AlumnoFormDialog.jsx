@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,52 +6,51 @@ import {
   TextField,
   Stack,
 } from '@mui/material';
-import { 
-  StyledDialogTitle, 
-  StyledDialogActions, 
-  SaveButton 
+import {
+  StyledDialogTitle,
+  StyledDialogActions,
+  SaveButton
 } from './AlumnoFormDialog.styles';
+import { useForm } from '../../../application/hooks/useForm';
+import { validateSchema } from '../../../application/utils/validateSchema';
+import { alumnoValidationSchema } from './alumnoValidationSchema';
 
 const estadoInicial = {
   nombre: '',
   apellido: '',
   rut: '',
+  edad: '',
   nombreApoderado: '',
   emailApoderado: '',
   telefonoApoderado: ''
 };
 
 export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => {
-  
-  // Estado que agrupa todos los campos del alumno
-  const [form, setForm] = useState(estadoInicial);
-  // De lo contrario, lo limpiamos al estado inicial.
+
+  const {
+    form,
+    errors,
+    handleFieldChange: handleChange,
+    reset,
+    handleSubmit
+  } = useForm(estadoInicial, (valores) => validateSchema(alumnoValidationSchema, valores));
+
   useEffect(() => {
     if (alumnoEditar) {
-      setForm(alumnoEditar);
+      // Merge con estadoInicial para evitar campos undefined en registros legacy
+      reset({ ...estadoInicial, ...alumnoEditar });
     } else {
-      setForm(estadoInicial);
+      reset(estadoInicial);
     }
   }, [alumnoEditar, open]);
-
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onGuardar(form); // Envía los datos capturados al caso de uso
-  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <StyledDialogTitle>
-        {alumnoEditar ? '📝 Actualizar Ficha de Alumno' : '🎓 Registrar Nuevo Alumno'}
+        {alumnoEditar ? 'Actualizar Ficha de Alumno' : 'Registrar Nuevo Alumno'}
       </StyledDialogTitle>
-      
-      <form onSubmit={handleSubmit}>
+
+      <form onSubmit={handleSubmit(onGuardar)}>
         <DialogContent dividers>
           <Stack spacing={2}>
             {/* DATOS DEL ESTUDIANTE */}
@@ -63,6 +62,8 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
                 required
                 value={form.nombre}
                 onChange={handleChange}
+                error={!!errors.nombre}
+                helperText={errors.nombre}
               />
               <TextField
                 label="Apellido"
@@ -71,18 +72,38 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
                 required
                 value={form.apellido}
                 onChange={handleChange}
+                error={!!errors.apellido}
+                helperText={errors.apellido}
               />
             </Stack>
-            <TextField
-              label="RUT del Estudiante"
-              name="rut"
-              placeholder="12345678-9"
-              fullWidth
-              required
-              value={form.rut}
-              onChange={handleChange}
-            />
-            
+            <Stack direction="row" spacing={2}>
+              <TextField
+                label="RUT del Estudiante"
+                name="rut"
+                placeholder="12345678-9"
+                fullWidth
+                required
+                value={form.rut}
+                onChange={handleChange}
+                error={!!errors.rut}
+                helperText={errors.rut}
+              />
+              <TextField
+                label="Edad"
+                name="edad"
+                type="number"
+                fullWidth
+                required
+                value={form.edad}
+                onChange={handleChange}
+                error={!!errors.edad}
+                helperText={errors.edad}
+                slotProps={{
+                  htmlInput: { min: 4, max: 20 }
+                }}
+              />
+            </Stack>
+
             {/* DATOS DEL APODERADO (Requerido para contacto legal) */}
             <TextField
               label="Nombre Completo del Apoderado"
@@ -91,6 +112,8 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
               required
               value={form.nombreApoderado}
               onChange={handleChange}
+              error={!!errors.nombreApoderado}
+              helperText={errors.nombreApoderado}
             />
             <TextField
               label="Email de Contacto"
@@ -100,6 +123,8 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
               required
               value={form.emailApoderado}
               onChange={handleChange}
+              error={!!errors.emailApoderado}
+              helperText={errors.emailApoderado}
             />
             <TextField
               label="Teléfono Móvil"
@@ -111,16 +136,17 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
               slotProps={{
                 htmlInput: { maxLength: 9 }
               }}
-              helperText="Formato: 9XXXXXXXX"
+              error={!!errors.telefonoApoderado}
+              helperText={errors.telefonoApoderado || "Formato: 9XXXXXXXX"}
             />
           </Stack>
         </DialogContent>
-        
+
         <StyledDialogActions>
           <Button onClick={onClose} color="inherit">Cancelar</Button>
-          <SaveButton 
-            type="submit" 
-            variant="contained" 
+          <SaveButton
+            type="submit"
+            variant="contained"
           >
             {alumnoEditar ? 'Guardar Cambios' : 'Confirmar Matrícula'}
           </SaveButton>

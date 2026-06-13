@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,9 @@ import {
   Button,
   MenuItem,
 } from '@mui/material';
-import { validarRut } from '../../../application/utils/validarRut';
+import { useForm } from '../../../application/hooks/useForm';
+import { validateSchema } from '../../../application/utils/validateSchema';
+import { getUsuarioValidationSchema } from './usuarioValidationSchema';
 import {
   StyledDialogTitle,
   StyledDialogActions,
@@ -21,55 +23,38 @@ const estadoInicial = {
   email: '',
   rut: '',
   rol: 'DOCENTE',
-  password: ''
+  password: '',
+  asignatura_id: ''
 };
 
 export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) => {
 
-  // Mantiene los valores de los inputs del formulario
-  const [form, setForm] = useState(estadoInicial);
+  const {
+    form,
+    errors,
+    handleFieldChange: handleChange,
+    reset,
+    handleSubmit
+  } = useForm(estadoInicial, (valores) => validateSchema(getUsuarioValidationSchema(!!usuarioEditar), valores));
 
-  // Almacena el mensaje de error de validación del RUT
-  const [errorRut, setErrorRut] = useState('');
   useEffect(() => {
     if (usuarioEditar) {
-      setForm({ ...usuarioEditar, password: '' }); // No mostramos el hash de la contraseña
+      reset({ ...usuarioEditar, password: '' });
     } else {
-      setForm(estadoInicial);
+      reset(estadoInicial);
     }
   }, [usuarioEditar, open]);
 
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-
-    // Limpieza reactiva del error de RUT mientras el usuario escribe
-    if (name === 'rut') setErrorRut('');
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // VALIDACIÓN: El RUT debe cumplir el formato chileno estándar
-    if (!validarRut(form.rut)) {
-      setErrorRut('RUT inválido. Formato requerido: 12345678-9');
-      return;
-    }
-
-    // Aseguramos consistencia en el ROL para el Backend (Enums en Java suelen ser UPPERCASE)
+  const onSubmit = (formData) => {
     onGuardar({
-      ...form,
-      rol: form.rol.toUpperCase()
+      ...formData,
+      rol: formData.rol.toUpperCase()
     });
-
-    setForm(estadoInicial);
-    setErrorRut('');
+    reset(estadoInicial);
   };
 
   const handleClose = () => {
-    setForm(estadoInicial);
-    setErrorRut('');
+    reset(estadoInicial);
     onClose();
   };
 
@@ -79,86 +64,116 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
         {usuarioEditar ? 'Editar Usuario' : 'Agregar Nuevo Usuario'}
       </StyledDialogTitle>
 
-      <DialogContent>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Nombre"
-          name="nombre"
-          value={form.nombre}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Apellido"
-          name="apellido"
-          value={form.apellido}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="Correo Electrónico"
-          name="email"
-          type="email"
-          value={form.email}
-          onChange={handleChange}
-          disabled={!!usuarioEditar} // El email suele ser el identificador en Firebase, mejor no cambiarlo aquí
-        />
-        <TextField
-          margin="normal"
-          required={!usuarioEditar}
-          fullWidth
-          label="Contraseña"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          slotProps={{
-            inputLabel: { shrink: true }
-          }}
-          helperText={usuarioEditar ? "Dejar en blanco para mantener la actual" : "Mínimo 6 caracteres"}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          label="RUT (ej: 12345678-9)"
-          name="rut"
-          value={form.rut}
-          onChange={handleChange}
-          error={!!errorRut}
-          helperText={errorRut}
-        />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <DialogContent>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Nombre"
+            name="nombre"
+            value={form.nombre}
+            onChange={handleChange}
+            error={!!errors.nombre}
+            helperText={errors.nombre}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Apellido"
+            name="apellido"
+            value={form.apellido}
+            onChange={handleChange}
+            error={!!errors.apellido}
+            helperText={errors.apellido}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Correo Electrónico"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            disabled={!!usuarioEditar} // identificador en Firebase, mejor no cambiarlo aquí
+            error={!!errors.email}
+            helperText={errors.email}
+          />
+          <TextField
+            margin="normal"
+            required={!usuarioEditar}
+            fullWidth
+            label="Contraseña"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            slotProps={{
+              inputLabel: { shrink: true }
+            }}
+            error={!!errors.password}
+            helperText={errors.password || (usuarioEditar ? "Dejar en blanco para mantener la actual" : "Mínimo 6 caracteres")}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="RUT (ej: 12345678-9)"
+            name="rut"
+            value={form.rut}
+            onChange={handleChange}
+            error={!!errors.rut}
+            helperText={errors.rut}
+          />
 
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          select
-          label="Rol / Tipo de Usuario"
-          name="rol"
-          value={form.rol}
-          onChange={handleChange}
-        >
-          {TIPOS_USUARIO.map((tipo) => (
-            <MenuItem key={tipo} value={tipo}>
-              {tipo.charAt(0) + tipo.slice(1).toLowerCase()}
-            </MenuItem>
-          ))}
-        </TextField>
-      </DialogContent>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            select
+            label="Rol / Tipo de Usuario"
+            name="rol"
+            value={form.rol}
+            onChange={handleChange}
+          >
+            {TIPOS_USUARIO.map((tipo) => (
+              <MenuItem key={tipo} value={tipo}>
+                {tipo.charAt(0) + tipo.slice(1).toLowerCase()}
+              </MenuItem>
+            ))}
+          </TextField>
 
-      <StyledDialogActions>
-        <Button onClick={handleClose} color="inherit">Cancelar</Button>
-        <SaveButton variant="contained" onClick={handleSubmit}>
-          {usuarioEditar ? 'Actualizar' : 'Crear Usuario'}
-        </SaveButton>
-      </StyledDialogActions>
+          {form.rol === 'DOCENTE' && (
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              select
+              label="Asignatura Base"
+              name="asignatura_id"
+              value={form.asignatura_id || ''}
+              onChange={handleChange}
+              error={!!errors.asignatura_id}
+              helperText={errors.asignatura_id}
+            >
+              <MenuItem value={1}>Matemáticas</MenuItem>
+              <MenuItem value={2}>Lenguaje y Comunicación</MenuItem>
+              <MenuItem value={3}>Historia y Geografía</MenuItem>
+              <MenuItem value={4}>Ciencias Naturales</MenuItem>
+              <MenuItem value={5}>Inglés</MenuItem>
+            </TextField>
+          )}
+        </DialogContent>
+
+        <StyledDialogActions>
+          <Button onClick={handleClose} color="inherit">Cancelar</Button>
+          <SaveButton variant="contained" type="submit">
+            {usuarioEditar ? 'Actualizar' : 'Crear Usuario'}
+          </SaveButton>
+        </StyledDialogActions>
+      </form>
     </Dialog>
   );
 };

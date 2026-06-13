@@ -15,7 +15,12 @@ import { UsuariosTable } from './presentation/modules/UsuariosModule/UsuariosTab
 import { AlumnosTable } from './presentation/modules/AlumnosModule/AlumnosTable';
 import { CursosTable } from './presentation/modules/CursosModule/CursosTable';
 import { AlumnosCursoView } from './presentation/modules/AlumnosCursoModule/AlumnosCursoView';
+import { CargaAcademicaView } from './presentation/modules/CargaAcademicaModule/CargaAcademicaView';
 import { Navbar } from './presentation/components/Navbar';
+import { MensajeriaView } from './presentation/modules/MensajeriaModule/MensajeriaView';
+import { AsistenciaView } from './presentation/modules/TeacherModule/AsistenciaView';
+import { EvaluacionesView } from './presentation/modules/TeacherModule/EvaluacionesView';
+import { MensajeriaProfesorView } from './presentation/modules/TeacherModule/MensajeriaProfesorView';
 
 const AuthRedirect = () => {
   const { currentUser, isAdmin, isCoordinador } = useAuth();
@@ -51,9 +56,19 @@ function App() {
                   <AdminDashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/usuarios" element={
+              <Route path="/admin/personal" element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
                   <UsuariosTable titulo="Control de Usuarios Institucionales" />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/alumnos" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AlumnosTable />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/mensajeria" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <MensajeriaView />
                 </ProtectedRoute>
               } />
 
@@ -77,10 +92,35 @@ function App() {
                   <AlumnosCursoView />
                 </ProtectedRoute>
               } />
+              <Route path="/coordinador/carga-academica" element={
+                <ProtectedRoute allowedRoles={['COORDINADOR']}>
+                  <CargaAcademicaView />
+                </ProtectedRoute>
+              } />
+              <Route path="/coordinador/mensajeria" element={
+                <ProtectedRoute allowedRoles={['COORDINADOR']}>
+                  <MensajeriaView />
+                </ProtectedRoute>
+              } />
 
               <Route path="/profesor" element={
                 <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <ProfesorDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/profesor/asistencia/:cursoId/:asignaturaId" element={
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
+                  <AsistenciaView />
+                </ProtectedRoute>
+              } />
+              <Route path="/profesor/evaluaciones/:cursoId/:asignaturaId" element={
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
+                  <EvaluacionesView />
+                </ProtectedRoute>
+              } />
+              <Route path="/profesor/mensajeria" element={
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
+                  <MensajeriaProfesorView />
                 </ProtectedRoute>
               } />
 
