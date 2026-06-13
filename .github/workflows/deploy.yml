@@ -7,8 +7,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # El nombre de la imagen se generará automáticamente usando tu nombre de usuario de GitHub
-  IMAGE_NAME: ${{ github.repository_owner }}/ev3-front-gestion-escolar
+  # Docker exige que todo esté en minúsculas, por lo que usamos zetsu-ser en lugar de zetsU-ser
+  IMAGE_NAME: zetsu-ser/ev3-front-gestion-escolar
 
 jobs:
   build-and-push:
