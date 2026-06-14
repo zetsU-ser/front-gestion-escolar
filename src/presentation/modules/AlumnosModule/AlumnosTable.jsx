@@ -41,7 +41,7 @@ export const AlumnosTable = () => {
         await crear(form);
       }
       handleClose(); // Cierre tras exito
-      showSnackbar("Alumno guardado con éxito", "success");
+      showSnackbar("Alumno Guardado con éxito", "success");
     } catch (error) {
       showSnackbar("No se pudo guardar la información del alumno: " + error.message, "error");
     }
