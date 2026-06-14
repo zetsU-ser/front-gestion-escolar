@@ -9,13 +9,12 @@ import { useCursos } from '../../../application/use-cases/useCursos';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
 import { PanelDashboard } from '../../components/organisms/PanelDashboard';
 import { BotonAccion } from '../../components/atoms/BotonAccion';
+import { useState } from 'react';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { DetalleMetricasCoordinador } from '../../components/organisms/DetalleMetricasCoordinador';
 import {
   DashboardContainer,
-  DashboardPaper,
-  TitleText,
-  EmailText,
   StyledDivider,
-  DescriptionText,
   ActionStack
 } from './CoordinadorDashboard.styles';
 
@@ -33,58 +32,35 @@ export const CoordinadorDashboard = () => {
   const { cursos } = useCursos();
   const { usuarios: docentes } = useUsuarios('DOCENTE');
 
+  const [metricaSeleccionada, setMetricaSeleccionada] = useState(null);
+
   const metricas = [
-    { valor: cursos.length, titulo: 'Cursos Registrados' },
-    { valor: alumnos.length, titulo: 'Alumnos Matriculados' },
-    { valor: docentes.length, titulo: 'Docentes Activos' }
+    { id: 'cursos', valor: cursos.length, titulo: 'Cursos Registrados' },
+    { id: 'alumnos', valor: alumnos.length, titulo: 'Alumnos Matriculados' },
+    { id: 'docentes', valor: docentes.length, titulo: 'Docentes Activos' }
   ];
 
   return (
     <DashboardContainer>
-      <DashboardPaper elevation={6}>
-        <TitleText variant="h3" gutterBottom>
-          Gestión de Coordinación
-        </TitleText>
+      <HeaderModulo 
+        titulo="Panel de Coordinación" 
+        correo={currentUser?.email}
+      />
 
-        <EmailText variant="h5" color="textSecondary">
-          {currentUser?.email}
-        </EmailText>
+      <StyledDivider />
 
-        <StyledDivider />
+        <PanelDashboard 
+          metricas={metricas} 
+          onSelectMetrica={(id) => setMetricaSeleccionada(id === metricaSeleccionada ? null : id)} 
+        />
 
-        {/* Organismo: PanelDashboard → TarjetaMetrica[] */}
-        <PanelDashboard metricas={metricas} />
+        <DetalleMetricasCoordinador 
+          metricaId={metricaSeleccionada} 
+          docentes={docentes} 
+          cursos={cursos} 
+          alumnos={alumnos} 
+        />
 
-        <DescriptionText variant="body1">
-          Bienvenido al centro de planificación. Como coordinador, tienes la responsabilidad
-          de estructurar los niveles académicos y asegurar que cada estudiante esté
-          correctamente matriculado en su curso.
-        </DescriptionText>
-
-        {/* Átomos: BotonAccion × 3 */}
-        <ActionStack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ mt: 4, flexWrap: 'wrap', gap: 2 }}>
-          <BotonAccion
-            startIcon={<SchoolIcon />}
-            onClick={() => navigate('/cursos')}
-          >
-            Gestión Académica
-          </BotonAccion>
-          <BotonAccion
-            color="secondary"
-            startIcon={<ClassIcon />}
-            onClick={() => navigate('/coordinador/carga-academica')}
-          >
-            Carga Académica
-          </BotonAccion>
-          <BotonAccion
-            color="info"
-            startIcon={<SendIcon />}
-            onClick={() => navigate('/coordinador/mensajeria')}
-          >
-            Mensajería Global
-          </BotonAccion>
-        </ActionStack>
-      </DashboardPaper>
     </DashboardContainer>
   );
 };

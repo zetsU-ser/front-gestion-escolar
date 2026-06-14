@@ -33,7 +33,12 @@ export const FormularioAsignacionHorario = ({
   });
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm(prev => ({ 
+      ...prev, 
+      [name]: value,
+      ...(name === 'asignaturaId' && { docenteId: '' }) 
+    }));
   };
 
   const handleSubmit = async (e) => {

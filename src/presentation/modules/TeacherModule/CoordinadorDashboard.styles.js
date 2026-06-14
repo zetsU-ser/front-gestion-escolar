@@ -5,18 +5,10 @@ export const DashboardContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
   minHeight: '80vh',
-}));
-
-export const DashboardPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(6),
-  borderRadius: theme.shape.borderRadius * 2,
-  textAlign: 'center',
-  maxWidth: 700,
-  background: 'rgba(255,255,255,0.9)',
-  backdropFilter: 'blur(10px)',
+  width: '100%',
+  maxWidth: '1200px',
+  margin: '0 auto',
 }));
 
 export const TitleText = styled(Typography)(({ theme }) => ({
@@ -30,11 +22,6 @@ export const EmailText = styled(Typography)(({ theme }) => ({
 
 export const StyledDivider = styled(Divider)(({ theme }) => ({
   marginBottom: theme.spacing(4),
-}));
-
-export const DescriptionText = styled(Typography)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
-  fontSize: '1.1rem',
 }));
 
 export const ActionStack = styled(Stack)(({ theme }) => ({
