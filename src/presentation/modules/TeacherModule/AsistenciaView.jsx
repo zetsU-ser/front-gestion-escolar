@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../../../application/context/AuthContext';
+import { useSnackbar } from '../../../application/context/SnackbarContext';
 import { useCursos } from '../../../application/use-cases/useCursos';
 import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
 
@@ -33,6 +34,7 @@ export const AsistenciaView = () => {
   const { cursoId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
+  const { showSnackbar } = useSnackbar();
   
   const { cursos, loading: loadingCursos } = useCursos();
   const { cargas, loading: loadingCargas } = useCargaAcademica();
@@ -145,9 +147,9 @@ export const AsistenciaView = () => {
       // Persistencia real usando el repositorio
       await asistenciaRepository.create(payload);
       
-      alert('¡Asistencia guardada con éxito!');
+      showSnackbar('¡Asistencia guardada con éxito!', 'success');
     } catch (error) {
-      alert('Error al guardar asistencia.');
+      showSnackbar('Error al guardar asistencia.', 'error');
     } finally {
       setLoadingGuardar(false);
     }

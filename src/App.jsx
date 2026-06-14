@@ -5,6 +5,7 @@ import { Box } from '@mui/material';
 
 import theme from './infrastructure/theme/theme';
 import { AuthProvider, useAuth } from './application/context/AuthContext';
+import { SnackbarProvider } from './application/context/SnackbarContext';
 import { ProtectedRoute } from './presentation/routes/ProtectedRoute';
 import { Unauthorized } from './presentation/routes/Unauthorized';
 import { LoginForm } from './presentation/modules/LoginModule/LoginForm';
@@ -40,8 +41,9 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
-        <BrowserRouter>
+      <SnackbarProvider>
+        <AuthProvider>
+          <BrowserRouter>
           <Navbar>
             <Routes>
               <Route path="/" element={<AuthRedirect />} />
@@ -137,6 +139,7 @@ function App() {
           </Navbar>
         </BrowserRouter>
       </AuthProvider>
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }

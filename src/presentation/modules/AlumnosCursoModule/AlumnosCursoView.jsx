@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 import { ArrowBack, PersonAdd } from '@mui/icons-material';
 import { AuthContext } from '../../../application/context/AuthContext';
+import { useSnackbar } from '../../../application/context/SnackbarContext';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
 import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
 import { useAlumnosCurso } from '../../../application/use-cases/useAlumnosCurso';
@@ -29,6 +30,7 @@ export const AlumnosCursoView = () => {
 
   const { cursoId } = useParams(); // obtiene el id del curso desde la ruta
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
 
   // hooks y lógica de negocio abstraída
   const { curso, asignaciones, loading, asignarAlumno, desvincularAlumno } = useAlumnosCurso(cursoId);
@@ -42,15 +44,21 @@ export const AlumnosCursoView = () => {
     try {
       await asignarAlumno(alumnoId);
       recargarAsignacionesGlobales();
+      showSnackbar("Alumno asignado con éxito", "success");
     } catch (err) {
-      alert("Error al asignar: " + err.message);
+      showSnackbar("Error al asignar: " + err.message, "error");
     }
   };
 
   // coordina la desvinculación y recarga el estado global
   const handleDesvincular = async (id) => {
-    await desvincularAlumno(id);
-    recargarAsignacionesGlobales();
+    try {
+      await desvincularAlumno(id);
+      recargarAsignacionesGlobales();
+      showSnackbar("Alumno removido con éxito", "success");
+    } catch (error) {
+      showSnackbar("Error al remover: " + error.message, "error");
+    }
   };
 
   if (loading || !curso) return <LoadingText>Cargando información del curso...</LoadingText>;

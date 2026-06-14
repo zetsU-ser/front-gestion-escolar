@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSnackbar } from '../../../application/context/SnackbarContext';
 
 import { Add as AddIcon } from '@mui/icons-material';
 import { useCursos } from '../../../application/use-cases/useCursos';
@@ -18,6 +19,7 @@ import {
 
 export const CursosTable = () => {
   const { cursos, loading, crear, eliminar } = useCursos();
+  const { showSnackbar } = useSnackbar();
   const { asignaciones, loading: loadingAsignaciones } = useAsignacionesAlumnos();
   const { currentUser } = useAuth();
   const [open, setOpen] = useState(false);
@@ -51,7 +53,14 @@ export const CursosTable = () => {
       <TablaCursosGestion
         cursos={cursos}
         asignaciones={asignaciones}
-        onDelete={eliminar}
+        onDelete={async (id) => {
+          try {
+            await eliminar(id);
+            showSnackbar("Curso eliminado con éxito", "success");
+          } catch (error) {
+            showSnackbar("No se pudo eliminar el curso: " + error.message, "error");
+          }
+        }}
         onNavigate={navigate}
       />
 
@@ -64,11 +73,16 @@ export const CursosTable = () => {
           // Validar que no exista un curso con el mismo nivel y letra
           const existe = cursos.some(c => c.nivel === data.nivel && c.letra === data.letra);
           if (existe) {
-            alert(`El curso ${data.nivel} ${data.letra} ya existe.`);
+            showSnackbar(`El curso ${data.nivel} ${data.letra} ya existe.`, "error");
             return;
           }
-          await crear(data);
-          setOpen(false); // Cierra el modal tras una creación exitosa
+          try {
+            await crear(data);
+            showSnackbar("Curso agregado exitosamente", "success");
+            setOpen(false); // Cierra el modal tras una creación exitosa
+          } catch (error) {
+            showSnackbar("Error al crear curso: " + error.message, "error");
+          }
         }}
       />
     </MainContainer>

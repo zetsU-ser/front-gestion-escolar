@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../../../application/context/AuthContext';
+import { useSnackbar } from '../../../application/context/SnackbarContext';
 import { useCursos } from '../../../application/use-cases/useCursos';
 import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
 
@@ -33,6 +34,7 @@ export const EvaluacionesView = () => {
   const { cursoId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
+  const { showSnackbar } = useSnackbar();
   
   const { cursos, loading: loadingCursos } = useCursos();
   const { cargas, loading: loadingCargas } = useCargaAcademica();
@@ -143,9 +145,9 @@ export const EvaluacionesView = () => {
       // Persistencia real mediante repositorio
       await calificacionRepository.createBatch(payload);
       
-      alert('¡Evaluaciones guardadas con éxito!');
+      showSnackbar('¡Evaluaciones guardadas con éxito!', 'success');
     } catch (error) {
-      alert(error.message);
+      showSnackbar(error.message, 'error');
     } finally {
       setLoadingGuardar(false);
     }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSnackbar } from '../../../application/context/SnackbarContext';
 import { Paper } from '@mui/material';
 import { Save as SaveIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
@@ -25,6 +26,7 @@ export const FormularioAsignacionHorario = ({
   loadingCargas,
   onAsignar
 }) => {
+  const { showSnackbar } = useSnackbar();
   const [form, setForm] = useState({
     docenteId: '',
     asignaturaId: '',
@@ -45,9 +47,9 @@ export const FormularioAsignacionHorario = ({
     e.preventDefault();
     try {
       await onAsignar({ ...form, cursoId });
-      alert('Bloque asignado exitosamente');
+      showSnackbar('Bloque asignado exitosamente', 'success');
     } catch (error) {
-      alert(error.message);
+      showSnackbar(error.message, 'error');
     }
   };
 
