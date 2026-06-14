@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Paper, Avatar, Typography, Alert, Box, Button } from '@mui/material';
+import { Paper, Avatar, Typography, Alert, Box, Button, Container, TextField, CircularProgress } from '@mui/material';
 
 export const LoginPaper = styled(Paper)(({ theme }) => ({
   marginTop: theme.spacing(12),
@@ -51,4 +51,13 @@ export const SubmitButton = styled(Button)(({ theme }) => ({
 
 export const FooterText = styled(Typography)(({ theme }) => ({
   marginTop: theme.spacing(4),
+}));
+
+export const StyledContainer = styled(Container)(({ theme }) => ({
+}));
+
+export const StyledTextField = styled(TextField)(({ theme }) => ({
+}));
+
+export const LoadingSpinner = styled(CircularProgress)(({ theme }) => ({
 }));

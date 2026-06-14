@@ -1,9 +1,12 @@
-import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
-import { FilaTablaEvaluacion } from '../molecules/FilaTablaEvaluacion';
+import { TablaProfesor } from './TablaProfesor';
+import { FilaAlumno } from '../molecules/FilaAlumno';
+import { TableCell, Typography } from '@mui/material';
+import { InputNota } from '../atoms/InputNota';
+import { calcularPromedio } from '../../../application/utils/promediosUtil';
 
 /**
  * Organismo: TablaEvaluaciones
- * Renderiza la matriz completa de calificaciones de un curso.
+ * Renderiza la matriz completa de calificaciones de un curso utilizando estructuras reutilizables.
  */
 export const TablaEvaluaciones = ({
   alumnos,
@@ -11,42 +14,55 @@ export const TablaEvaluaciones = ({
   onNotaChange,
   disabled
 }) => {
+  const headers = ['RUT', 'Alumno', 'Evaluación 1', 'Evaluación 2', 'Evaluación 3', 'Promedio Final'];
+
   return (
-    <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: '12px', overflowX: 'auto' }}>
-      <Typography variant="h6" gutterBottom color="textSecondary">
-        Registro de Calificaciones (1.0 - 7.0)
-      </Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>RUT</TableCell>
-            <TableCell>Alumno</TableCell>
-            <TableCell>Evaluación 1</TableCell>
-            <TableCell>Evaluación 2</TableCell>
-            <TableCell>Evaluación 3</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {alumnos.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} align="center">No hay alumnos matriculados en este curso.</TableCell>
-            </TableRow>
-          ) : (
-            alumnos.map(alumno => {
-              const notas = estadoNotas[alumno.id] || { nota1: '', nota2: '', nota3: '' };
-              return (
-                <FilaTablaEvaluacion
-                  key={alumno.id}
-                  alumno={alumno}
-                  notas={notas}
-                  onNotaChange={onNotaChange}
-                  disabled={disabled}
-                />
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
-    </Paper>
+    <TablaProfesor
+      titulo="Registro de Calificaciones (1.0 - 7.0)"
+      headers={headers}
+      isEmpty={alumnos.length === 0}
+      colSpanEmpty={headers.length}
+    >
+      {alumnos.map(alumno => {
+        const notas = estadoNotas[alumno.id] || { nota1: '', nota2: '', nota3: '' };
+        return (
+          <FilaAlumno key={alumno.id} alumno={alumno}>
+            <TableCell>
+              <InputNota
+                value={notas.nota1}
+                onChange={(val) => onNotaChange(alumno.id, 'nota1', val)}
+                disabled={disabled}
+              />
+            </TableCell>
+            <TableCell>
+              <InputNota
+                value={notas.nota2}
+                onChange={(val) => onNotaChange(alumno.id, 'nota2', val)}
+                disabled={disabled}
+              />
+            </TableCell>
+            <TableCell>
+              <InputNota
+                value={notas.nota3}
+                onChange={(val) => onNotaChange(alumno.id, 'nota3', val)}
+                disabled={disabled}
+              />
+            </TableCell>
+            <TableCell align="center">
+              <Typography 
+                fontWeight="bold" 
+                color={
+                  calcularPromedio([notas.nota1, notas.nota2, notas.nota3]) < 4.0 && calcularPromedio([notas.nota1, notas.nota2, notas.nota3]) !== '-' 
+                    ? 'error.main' 
+                    : 'primary.main'
+                }
+              >
+                {calcularPromedio([notas.nota1, notas.nota2, notas.nota3])}
+              </Typography>
+            </TableCell>
+          </FilaAlumno>
+        );
+      })}
+    </TablaProfesor>
   );
 };

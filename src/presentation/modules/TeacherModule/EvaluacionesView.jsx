@@ -1,41 +1,106 @@
-import { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Box, CircularProgress, Stack } from '@mui/material';
+import { useContext, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { AuthContext } from '../../../application/context/AuthContext';
 import { useCursos } from '../../../application/use-cases/useCursos';
+import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
+
 import { alumnoCursoRepository } from '../../../infrastructure/repositories/HttpCursosRepository';
+import { calificacionRepository } from '../../../infrastructure/repositories/HttpCalificacionRepository';
+
 import { TablaEvaluaciones } from '../../components/organisms/TablaEvaluaciones';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { FiltroNivelCurso } from '../../components/molecules/FiltroNivelCurso';
+import { DetalleCursoInfo } from '../../components/molecules/DetalleCursoInfo';
 import { BotonAccion } from '../../components/atoms/BotonAccion';
-import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { DashboardContainer, StyledPaper, Title } from './ProfesorDashboard.styles';
+
+import { Save as SaveIcon } from '@mui/icons-material';
+
+import { 
+  DashboardContainer, 
+  StyledPaper, 
+  StyledDivider, 
+  FilterPaper, 
+  SectionTitle, 
+  LoadingContainer, 
+  ButtonContainer, 
+  LoadingSpinner, 
+  EmptyStatePaper, 
+  EmptyStateText 
+} from './ProfesorDashboard.styles';
 
 export const EvaluacionesView = () => {
-  const { cursoId, asignaturaId } = useParams();
-  const navigate = useNavigate();
-  const { cursos, loading: loadingCursos } = useCursos();
+  const { cursoId } = useParams();
+  const { currentUser } = useContext(AuthContext);
   
+  const { cursos, loading: loadingCursos } = useCursos();
+  const { cargas, loading: loadingCargas } = useCargaAcademica();
+  
+  // maneja el estado de la tabla interactiva y datos de alumnos
   const [alumnosCurso, setAlumnosCurso] = useState([]);
-  const [loadingAlumnos, setLoadingAlumnos] = useState(true);
+  const [loadingAlumnos, setLoadingAlumnos] = useState(false);
   const [estadoNotas, setEstadoNotas] = useState({});
   const [loadingGuardar, setLoadingGuardar] = useState(false);
 
-  const cursoActual = cursos.find(c => String(c.id) === String(cursoId));
+  // maneja el estado de los filtros
+  const [nivelFiltro, setNivelFiltro] = useState('');
+  const [cursoFiltro, setCursoFiltro] = useState(cursoId || '');
+
+  // extrae los cursos que dicta el docente
+  const profesorId = currentUser?.profile?.id;
+  const miHorario = cargas.filter(c => c.docenteId === profesorId);
+  const misCursosIds = [...new Set(miHorario.map(c => c.cursoId))];
+  const misCursos = cursos.filter(c => misCursosIds.includes(c.id));
+
+  const cursoActual = cursos.find(c => String(c.id) === String(cursoFiltro));
+
+  // filtra las opciones de cursos según el nivel seleccionado
+  const cursosOpciones = misCursos
+    .filter(c => {
+      if (!nivelFiltro) return true;
+      if (nivelFiltro === 'BASICA') return c.nivel?.includes('Básico');
+      if (nivelFiltro === 'MEDIA') return c.nivel?.includes('Medio');
+      return true;
+    })
+    .map(c => ({
+      value: c.id,
+      label: `${c.nivel} ${c.letra}`
+    }));
+
+  useEffect(() => {
+    if (cursoId) {
+      setCursoFiltro(cursoId);
+    }
+  }, [cursoId]);
 
   useEffect(() => {
     const fetchAlumnos = async () => {
       setLoadingAlumnos(true);
       try {
-        const asignaciones = await alumnoCursoRepository.getByCurso(cursoId);
+        const asignaciones = await alumnoCursoRepository.getByCurso(cursoFiltro);
         const listaAlumnos = asignaciones.map(a => a.alumno).filter(Boolean);
         setAlumnosCurso(listaAlumnos);
+        
+        // Simulación: Cargar notas de localStorage
+        const storedNotas = localStorage.getItem(`notas_curso_${cursoFiltro}`);
+        if (storedNotas) {
+          setEstadoNotas(JSON.parse(storedNotas));
+        } else {
+          setEstadoNotas({});
+        }
       } catch (err) {
         console.error("Error cargando alumnos del curso:", err);
       } finally {
         setLoadingAlumnos(false);
       }
     };
-    if (cursoId) fetchAlumnos();
-  }, [cursoId]);
+    if (cursoFiltro) {
+      fetchAlumnos();
+    } else {
+      setAlumnosCurso([]);
+      setEstadoNotas({});
+    }
+  }, [cursoFiltro]);
 
   const handleNotaChange = (alumnoId, campo, valor) => {
     setEstadoNotas(prev => ({
@@ -64,8 +129,8 @@ export const EvaluacionesView = () => {
       }
 
       const payload = {
-        curso_id: Number(cursoId),
-        asignatura_id: Number(asignaturaId),
+        curso_id: Number(cursoFiltro),
+        profesor_id: currentUser?.profile?.id,
         alumnos: alumnosCurso.map(a => ({
           alumno_id: a.id,
           nota1: estadoNotas[a.id]?.nota1 || null,
@@ -74,9 +139,9 @@ export const EvaluacionesView = () => {
         }))
       };
 
-      // Simular guardado masivo
-      await new Promise(r => setTimeout(r, 1000));
-      console.log('Payload a ms-gestion-academica:', payload);
+      // Persistencia real mediante repositorio
+      await calificacionRepository.createBatch(payload);
+      
       alert('¡Evaluaciones guardadas con éxito!');
     } catch (error) {
       alert(error.message);
@@ -85,50 +150,74 @@ export const EvaluacionesView = () => {
     }
   };
 
-  if (loadingAlumnos || loadingCursos) {
+  if (loadingCargas || loadingCursos) {
     return (
       <DashboardContainer>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingContainer>
+          <LoadingSpinner />
+        </LoadingContainer>
       </DashboardContainer>
     );
   }
 
   return (
     <DashboardContainer>
-      <StyledPaper elevation={4}>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-          <BotonAccion variant="text" onClick={() => navigate('/profesor')}>
-            <ArrowBackIcon /> Volver al Horario
-          </BotonAccion>
-        </Stack>
+      {/* muestra el encabezado de la página */}
+      <HeaderModulo titulo="Registro de Calificaciones" correo={currentUser?.email} />
+      <StyledDivider />
 
-        <Title variant="h4" gutterBottom>
-          Registro de Calificaciones
-        </Title>
-        <Typography variant="h6" color="secondary" sx={{ mb: 4 }}>
-          {cursoActual ? `Curso: ${cursoActual.nivel} ${cursoActual.letra}` : 'Curso'}
-        </Typography>
-
-        <TablaEvaluaciones
-          alumnos={alumnosCurso}
-          estadoNotas={estadoNotas}
-          onNotaChange={handleNotaChange}
-          disabled={loadingGuardar}
+      <FilterPaper>
+        <SectionTitle variant="h6">
+          Selecciona Nivel y Curso para operar
+        </SectionTitle>
+        <FiltroNivelCurso
+          nivelSeleccionado={nivelFiltro}
+          onNivelChange={(e) => {
+            setNivelFiltro(e.target.value);
+            setCursoFiltro('');
+          }}
+          cursoSeleccionado={cursoFiltro}
+          onCursoChange={(e) => setCursoFiltro(e.target.value)}
+          cursosOpciones={cursosOpciones}
+          loadingCursos={loadingCursos}
         />
+      </FilterPaper>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-          <BotonAccion 
-            color="secondary"
-            startIcon={<SaveIcon />} 
-            onClick={handleGuardar}
-            loading={loadingGuardar}
-          >
-            Guardar Evaluaciones
-          </BotonAccion>
-        </Box>
-      </StyledPaper>
+      {/* renderiza el detalle de información si hay curso */}
+      {cursoFiltro && (
+        <DetalleCursoInfo curso={cursoActual} />
+      )}
+
+      {/* renderiza la tabla de alumnos y registro de calificaciones */}
+      {loadingAlumnos ? (
+        <LoadingContainer>
+          <LoadingSpinner />
+        </LoadingContainer>
+      ) : cursoFiltro && alumnosCurso.length > 0 ? (
+        <>
+          <TablaEvaluaciones
+            alumnos={alumnosCurso}
+            estadoNotas={estadoNotas}
+            onNotaChange={handleNotaChange}
+            disabled={loadingGuardar}
+          />
+
+          <ButtonContainer>
+            <BotonAccion 
+              startIcon={<SaveIcon />} 
+              onClick={handleGuardar}
+              loading={loadingGuardar}
+              color="primary"
+            >
+              Guardar Evaluaciones
+            </BotonAccion>
+          </ButtonContainer>
+        </>
+      ) : cursoFiltro ? (
+        <EmptyStatePaper>
+          <EmptyStateText>No hay alumnos registrados en este curso.</EmptyStateText>
+        </EmptyStatePaper>
+      ) : null}
     </DashboardContainer>
   );
 };

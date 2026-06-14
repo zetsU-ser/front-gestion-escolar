@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Paper, Button, Typography } from '@mui/material';
+import { Box, Paper, Button, Typography, Divider } from '@mui/material';
 
 export const MainContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -25,4 +25,8 @@ export const SendButton = styled(Button)(({ theme }) => ({
   padding: theme.spacing(1.5, 4),
   fontWeight: 'bold',
   borderRadius: '8px',
+}));
+
+export const StyledDivider = styled(Divider)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
 }));

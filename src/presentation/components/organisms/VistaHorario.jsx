@@ -1,12 +1,6 @@
 import { Typography, Paper, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Box } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-
-const SchedulePaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderRadius: '12px',
-  overflowX: 'auto',
-}));
+import { DetailWrapper, HeaderBox, StyledTableHeadRow, HeaderCell } from './TablaProfesor.styles';
 
 const DIAS_SEMANA = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES'];
 const BLOQUES = [
@@ -16,22 +10,24 @@ const BLOQUES = [
   { id: 4, label: 'Bloque 4 (14:00 - 15:30)' }
 ];
 
-export const VistaHorario = ({ cargasCurso, getDisplayData, onEliminar }) => {
+export const VistaHorario = ({ cargasCurso, getDisplayData, onEliminar, titulo = "Horario Semanal del Curso" }) => {
   return (
-    <SchedulePaper elevation={2}>
-      <Typography variant="h6" gutterBottom color="textSecondary">
-        Horario Semanal del Curso
-      </Typography>
+    <DetailWrapper component={Paper} elevation={3}>
+      <HeaderBox>
+        <Typography variant="h6">
+          {titulo}
+        </Typography>
+      </HeaderBox>
       <Table sx={{ minWidth: 800 }}>
         <TableHead>
-          <TableRow>
-            <TableCell sx={{ width: '15%', fontWeight: 'bold' }}>Bloque Horario</TableCell>
+          <StyledTableHeadRow>
+            <HeaderCell sx={{ width: '15%' }}>Bloque Horario</HeaderCell>
             {DIAS_SEMANA.map(dia => (
-              <TableCell key={dia} align="center" sx={{ fontWeight: 'bold', width: '17%' }}>
+              <HeaderCell key={dia} align="center" sx={{ width: '17%' }}>
                 {dia}
-              </TableCell>
+              </HeaderCell>
             ))}
-          </TableRow>
+          </StyledTableHeadRow>
         </TableHead>
         <TableBody>
           {BLOQUES.map(bloque => (
@@ -57,14 +53,16 @@ export const VistaHorario = ({ cargasCurso, getDisplayData, onEliminar }) => {
                       <Typography variant="caption" color="textSecondary">
                         {data.docenteStr}
                       </Typography>
-                      <IconButton 
-                        color="error" 
-                        size="small" 
-                        onClick={() => onEliminar(carga.id)}
-                        sx={{ position: 'absolute', top: -4, right: -4 }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      {onEliminar && (
+                        <IconButton 
+                          color="error" 
+                          size="small" 
+                          onClick={() => onEliminar(carga.id)}
+                          sx={{ position: 'absolute', top: -4, right: -4 }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
                     </Box>
                   </TableCell>
                 );
@@ -73,6 +71,6 @@ export const VistaHorario = ({ cargasCurso, getDisplayData, onEliminar }) => {
           ))}
         </TableBody>
       </Table>
-    </SchedulePaper>
+    </DetailWrapper>
   );
 };

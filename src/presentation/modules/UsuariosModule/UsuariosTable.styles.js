@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Typography, Button, TableContainer, TableHead, TableCell } from '@mui/material';
+import { Box, Typography, Button, TableContainer, TableHead, TableCell, Divider, Alert, CircularProgress } from '@mui/material';
 
 export const LoadingContainer = styled(Box)(({ theme }) => ({
   textAlign: 'center',
@@ -38,4 +38,21 @@ export const HeaderCell = styled(TableCell)(({ theme }) => ({
 export const EmptyRowCell = styled(TableCell)(({ theme }) => ({
   paddingTop: theme.spacing(3),
   paddingBottom: theme.spacing(3),
+}));
+
+export const StyledDivider = styled(Divider)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+}));
+
+export const ButtonContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  marginBottom: theme.spacing(2),
+}));
+
+export const ErrorAlert = styled(Alert)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+export const LoadingSpinner = styled(CircularProgress)(({ theme }) => ({
 }));

@@ -1,12 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../application/context/AuthContext';
-import {
-  Container,
-  TextField,
-  Typography,
-  CircularProgress,
-} from '@mui/material';
+
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useLogin } from '../../../application/use-cases/useLogin';
 import {
@@ -17,7 +12,10 @@ import {
   StyledAlert,
   FormBox,
   SubmitButton,
-  FooterText
+  FooterText,
+  StyledContainer,
+  StyledTextField,
+  LoadingSpinner
 } from './LoginForm.styles';
 
 export const LoginForm = () => {
@@ -48,7 +46,7 @@ export const LoginForm = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <StyledContainer component="main" maxWidth="xs">
       <LoginPaper elevation={10}>
         <StyledAvatar>
           <LockOutlinedIcon fontSize="large" />
@@ -68,7 +66,7 @@ export const LoginForm = () => {
         )}
 
         <FormBox component="form" onSubmit={handleSubmit} noValidate>
-          <TextField
+          <StyledTextField
             margin="normal"
             required
             fullWidth
@@ -81,7 +79,7 @@ export const LoginForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
           />
-          <TextField
+          <StyledTextField
             margin="normal"
             required
             fullWidth
@@ -102,7 +100,7 @@ export const LoginForm = () => {
             size="large"
             disabled={loading}
           >
-            {loading ? <CircularProgress size={26} color="inherit" /> : 'Entrar al Sistema'}
+            {loading ? <LoadingSpinner size={26} color="inherit" /> : 'Entrar al Sistema'}
           </SubmitButton>
         </FormBox>
       </LoginPaper>
@@ -110,6 +108,6 @@ export const LoginForm = () => {
       <FooterText variant="body2" color="textSecondary" align="center">
         © {new Date().getFullYear()} Colegio - Sistema de Gestión Académica
       </FooterText>
-    </Container>
+    </StyledContainer>
   );
 };

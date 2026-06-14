@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Typography, Divider } from '@mui/material';
+
 import { Add as AddIcon } from '@mui/icons-material';
 import { useCursos } from '../../../application/use-cases/useCursos';
 import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
@@ -9,8 +9,11 @@ import { HeaderModulo } from '../../components/molecules/HeaderModulo';
 import { useAuth } from '../../../application/context/AuthContext';
 import { TablaCursosGestion } from '../../components/organisms/TablaCursosGestion';
 import {
-  MainContainer, 
-  AddButton
+  MainContainer,
+  AddButton,
+  LoadingText,
+  StyledDivider,
+  ButtonContainer
 } from './CursosTable.styles';
 
 export const CursosTable = () => {
@@ -18,24 +21,24 @@ export const CursosTable = () => {
   const { asignaciones, loading: loadingAsignaciones } = useAsignacionesAlumnos();
   const { currentUser } = useAuth();
   const [open, setOpen] = useState(false);
-  
+
   // Hook de navegación para redirigir a la vista detallada de alumnos por curso
   const navigate = useNavigate();
-  if (loading || loadingAsignaciones) return <Typography>Cargando cursos...</Typography>;
+  if (loading || loadingAsignaciones) return <LoadingText>Cargando cursos...</LoadingText>;
 
   return (
     <MainContainer>
       {/* muestra el encabezado del módulo (atomizado) */}
-      <HeaderModulo 
-        titulo="Gestión de Cursos" 
+      <HeaderModulo
+        titulo="Gestión de Cursos"
         correo={currentUser?.email}
       />
-      
-      <Divider sx={{ mb: 4 }} />
 
-      
+      <StyledDivider />
+
+
       {/* Botón flotante superior derecho como en el resto de vistas */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+      <ButtonContainer>
         <AddButton
           variant="contained"
           startIcon={<AddIcon />}
@@ -43,7 +46,7 @@ export const CursosTable = () => {
         >
           Nuevo Curso
         </AddButton>
-      </Box>
+      </ButtonContainer>
       {/* Organismo: Tabla de Cursos Atomizada */}
       <TablaCursosGestion
         cursos={cursos}

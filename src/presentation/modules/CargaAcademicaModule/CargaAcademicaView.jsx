@@ -1,14 +1,22 @@
-import { useState } from 'react';
-import { Paper, Typography, Divider } from '@mui/material';
+import { useContext, useState } from 'react';
+
+import { AuthContext } from '../../../application/context/AuthContext';
 import { useCursos } from '../../../application/use-cases/useCursos';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
 import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
-import { useAuth } from '../../../application/context/AuthContext';
-import { HeaderModulo } from '../../components/molecules/HeaderModulo';
-import { FiltroNivelCurso } from '../../components/molecules/FiltroNivelCurso';
+
 import { FormularioAsignacionHorario } from '../../components/organisms/FormularioAsignacionHorario';
 import { VistaHorario } from '../../components/organisms/VistaHorario';
-import { MainContainer } from './CargaAcademicaView.styles';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { FiltroNivelCurso } from '../../components/molecules/FiltroNivelCurso';
+import { 
+  MainContainer, 
+  StyledDivider, 
+  FilterPaper, 
+  SectionTitle, 
+  EmptyStatePaper, 
+  EmptyStateText 
+} from './CargaAcademicaView.styles';
 
 const ASIGNATURAS_MOCK = [
   { id: 1, nombre: 'Matemáticas' },
@@ -30,10 +38,11 @@ const BLOQUES = [
  * Compone la vista completa aplicando Atomic Design.
  */
 export const CargaAcademicaView = () => {
+  const { currentUser } = useContext(AuthContext);
+
   const { cursos, loading: loadingCursos } = useCursos();
   const { usuarios: docentes, loading: loadingDocentes } = useUsuarios('DOCENTE');
   const { cargas, loading: loadingCargas, asignarBloque, eliminarBloque } = useCargaAcademica();
-  const { currentUser } = useAuth();
 
   // Estados locales para la selección jerárquica
   const [nivel, setNivel] = useState('');
@@ -93,13 +102,13 @@ export const CargaAcademicaView = () => {
         correo={currentUser?.email}
       />
       
-      <Divider sx={{ mb: 4 }} />
+      <StyledDivider />
 
       {/* 1. Nivel y Curso */}
-      <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: '12px' }}>
-        <Typography variant="h6" gutterBottom color="textSecondary">
+      <FilterPaper elevation={2}>
+        <SectionTitle variant="h6">
           Selección de Curso
-        </Typography>
+        </SectionTitle>
         <FiltroNivelCurso
           nivelSeleccionado={nivel}
           onNivelChange={(e) => {
@@ -111,7 +120,7 @@ export const CargaAcademicaView = () => {
           cursosOpciones={cursosOpciones}
           loadingCursos={loadingCursos}
         />
-      </Paper>
+      </FilterPaper>
 
       {/* 2. Formulario y Horario (Solo si hay un curso seleccionado) */}
       {cursoId ? (
@@ -132,11 +141,11 @@ export const CargaAcademicaView = () => {
           />
         </>
       ) : (
-        <Paper elevation={0} sx={{ p: 4, textAlign: 'center', bgcolor: 'transparent' }}>
-          <Typography color="textSecondary">
+        <EmptyStatePaper>
+          <EmptyStateText>
             Seleccione un nivel educativo y luego un curso para construir su horario.
-          </Typography>
-        </Paper>
+          </EmptyStateText>
+        </EmptyStatePaper>
       )}
 
     </MainContainer>

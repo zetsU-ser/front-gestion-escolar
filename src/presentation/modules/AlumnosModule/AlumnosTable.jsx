@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import {
-  Divider,
-  Box,
-} from '@mui/material';
+
 import { Add as AddIcon } from '@mui/icons-material';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
 import { useAuth } from '../../../application/context/AuthContext';
@@ -12,7 +9,9 @@ import { TablaAlumnosGlobal } from '../../components/organisms/TablaAlumnosGloba
 import {
   LoadingText,
   MainContainer,
-  AddButton
+  AddButton,
+  StyledDivider,
+  ButtonContainer
 } from './AlumnosTable.styles';
 
 export const AlumnosTable = () => {
@@ -50,14 +49,14 @@ export const AlumnosTable = () => {
   return (
     <MainContainer>
       {/* muestra el encabezado del módulo */}
-      <HeaderModulo 
-        titulo="Registro de Alumnos (Matrículas)" 
+      <HeaderModulo
+        titulo="Registro de Alumnos (Matrículas)"
         correo={currentUser?.email}
       />
 
-      <Divider sx={{ mb: 4 }} /> {/* separador visual idéntico al dashboard */}
+      <StyledDivider /> {/* separador visual idéntico al dashboard */}
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+      <ButtonContainer>
         <AddButton
           variant="contained"
           startIcon={<AddIcon />}
@@ -65,7 +64,7 @@ export const AlumnosTable = () => {
         >
           Registrar Nuevo Alumno
         </AddButton>
-      </Box>
+      </ButtonContainer>
 
       {/* Organismo: Tabla de Alumnos Atomizada */}
       <TablaAlumnosGlobal

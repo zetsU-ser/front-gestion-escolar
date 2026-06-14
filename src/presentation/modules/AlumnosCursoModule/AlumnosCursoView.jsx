@@ -1,22 +1,32 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button } from '@mui/material';
+
 import { ArrowBack, PersonAdd } from '@mui/icons-material';
+import { AuthContext } from '../../../application/context/AuthContext';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
 import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
 import { useAlumnosCurso } from '../../../application/use-cases/useAlumnosCurso';
+
 import { TablaAlumnosCurso } from '../../components/organisms/TablaAlumnosCurso';
 import { ModalMatricularAlumno } from '../../components/organisms/ModalMatricularAlumno';
-import { 
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import {
   MainContainer, 
   BackButton, 
   HeaderPaper, 
   HeaderStack, 
-  TitleText 
+  TitleText,
+  LoadingText,
+  SubtitleText,
+  EnrollButton,
+  TitleBox,
+  StyledDivider
 } from './AlumnosCursoView.styles';
 
 // vista principal para gestionar los alumnos de un curso específico (presenter)
 export const AlumnosCursoView = () => {
+  const { currentUser } = useContext(AuthContext);
+
   const { cursoId } = useParams(); // obtiene el id del curso desde la ruta
   const navigate = useNavigate();
 
@@ -43,29 +53,34 @@ export const AlumnosCursoView = () => {
     recargarAsignacionesGlobales();
   };
 
-  if (loading || !curso) return <Typography sx={{ p: 4 }}>Cargando información del curso...</Typography>;
+  if (loading || !curso) return <LoadingText>Cargando información del curso...</LoadingText>;
 
   return (
     <MainContainer>
+      <HeaderModulo 
+        titulo="Gestión de Curso Específico"
+        correo={currentUser?.email}
+      />
+      <StyledDivider />
+
       <BackButton startIcon={<ArrowBack />} onClick={() => navigate('/cursos')}>
         Volver a Cursos
       </BackButton>
-      
       <HeaderPaper elevation={2}>
         <HeaderStack direction="row">
-          <Box>
+          <TitleBox>
             <TitleText variant="h4">
               {curso.nivel} {curso.letra}
             </TitleText>
-            <Typography color="textSecondary">Lista de Alumnos Matriculados</Typography>
-          </Box>
-          <Button 
+            <SubtitleText>Lista de Alumnos Matriculados</SubtitleText>
+          </TitleBox>
+          <EnrollButton 
             variant="contained" 
             startIcon={<PersonAdd />} 
             onClick={() => setOpenSelector(true)} // abre el modal
           >
             Matricular Alumno
-          </Button>
+          </EnrollButton>
         </HeaderStack>
       </HeaderPaper>
 

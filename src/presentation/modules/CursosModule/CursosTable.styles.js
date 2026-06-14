@@ -1,8 +1,10 @@
 import { styled } from '@mui/material/styles';
-import { Box, Typography, Button, Paper, Card } from '@mui/material';
+import { Box, Typography, Button, Paper, Card, Divider } from '@mui/material';
 
 export const MainContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
+  padding: theme.spacing(4),
+  maxWidth: '1200px',
+  margin: '0 auto',
 }));
 
 export const HeaderContainer = styled(Box)(({ theme }) => ({
@@ -47,4 +49,18 @@ export const CardActionsContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   marginTop: theme.spacing(2),
+}));
+
+export const LoadingText = styled(Typography)(({ theme }) => ({
+  padding: theme.spacing(4),
+}));
+
+export const StyledDivider = styled(Divider)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+}));
+
+export const ButtonContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  marginBottom: theme.spacing(2),
 }));
