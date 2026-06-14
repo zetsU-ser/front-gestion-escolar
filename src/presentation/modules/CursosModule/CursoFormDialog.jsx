@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Stack,
-  MenuItem
-} from '@mui/material';
+  StyledDialog,
+  StyledDialogTitle,
+  StyledDialogContent,
+  StyledDialogActions,
+  StyledButton,
+  SaveButton,
+  StyledTextField,
+  StyledStack,
+  StyledMenuItem
+} from './CursoFormDialog.styles';
 
 const NIVELES = [
   '1° Básico', '2° Básico', '3° Básico', '4° Básico', '5° Básico', '6° Básico', '7° Básico', '8° Básico',
@@ -39,12 +40,12 @@ export const CursoFormDialog = ({ open, onClose, onGuardar, cursosExistentes = [
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Crear Nuevo Curso</DialogTitle>
+    <StyledDialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <StyledDialogTitle>Crear Nuevo Curso</StyledDialogTitle>
       <form onSubmit={handleSubmit}>
-        <DialogContent dividers>
-          <Stack spacing={2}>
-            <TextField
+        <StyledDialogContent dividers>
+          <StyledStack spacing={2}>
+            <StyledTextField
               select
               label="Nivel"
               fullWidth
@@ -53,10 +54,10 @@ export const CursoFormDialog = ({ open, onClose, onGuardar, cursosExistentes = [
               onChange={(e) => setForm({ nivel: e.target.value, letra: '' })}
             >
               {nivelesDisponibles.map((n) => (
-                <MenuItem key={n} value={n}>{n}</MenuItem>
+                <StyledMenuItem key={n} value={n}>{n}</StyledMenuItem>
               ))}
-            </TextField>
-            <TextField
+            </StyledTextField>
+            <StyledTextField
               select
               label="Letra / Paralelo"
               fullWidth
@@ -66,16 +67,16 @@ export const CursoFormDialog = ({ open, onClose, onGuardar, cursosExistentes = [
               onChange={(e) => setForm({ ...form, letra: e.target.value })}
             >
               {letrasDisponibles.map((l) => (
-                <MenuItem key={l} value={l}>{l}</MenuItem>
+                <StyledMenuItem key={l} value={l}>{l}</StyledMenuItem>
               ))}
-            </TextField>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Cancelar</Button>
-          <Button type="submit" variant="contained">Crear Curso</Button>
-        </DialogActions>
+            </StyledTextField>
+          </StyledStack>
+        </StyledDialogContent>
+        <StyledDialogActions>
+          <StyledButton onClick={onClose}>Cancelar</StyledButton>
+          <SaveButton type="submit" variant="contained">Crear Curso</SaveButton>
+        </StyledDialogActions>
       </form>
-    </Dialog>
+    </StyledDialog>
   );
 };

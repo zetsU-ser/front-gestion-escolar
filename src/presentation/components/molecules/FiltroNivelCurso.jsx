@@ -18,7 +18,7 @@ export const FiltroNivelCurso = ({
   cursosOpciones,
   loadingCursos
 }) => (
-  <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} flexWrap="wrap">
+  <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} sx={{ flexWrap: 'wrap' }}>
     <SelectorDesplegable
       label="Nivel Educativo"
       name="nivel"

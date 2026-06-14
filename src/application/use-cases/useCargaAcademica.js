@@ -36,6 +36,28 @@ export const useCargaAcademica = () => {
   const asignarBloque = async (payload) => {
     try {
       await new Promise(r => setTimeout(r, 500));
+      
+      // Validaciones de sobreasignación
+      const conflictoCurso = cargas.find(c => 
+        c.cursoId === payload.cursoId && 
+        c.diaSemana === payload.diaSemana && 
+        c.bloqueHorario === payload.bloqueHorario
+      );
+
+      if (conflictoCurso) {
+        throw new Error("El curso ya tiene una asignatura asignada en este bloque horario.");
+      }
+
+      const conflictoDocente = cargas.find(c =>
+        c.docenteId === payload.docenteId &&
+        c.diaSemana === payload.diaSemana &&
+        c.bloqueHorario === payload.bloqueHorario
+      );
+
+      if (conflictoDocente) {
+        throw new Error("El docente ya se encuentra ocupado en este bloque horario en otro curso.");
+      }
+
       setCargas(prev => {
         const newCargas = [...prev, { id: Date.now(), ...payload }];
         localStorage.setItem('mockCargas', JSON.stringify(newCargas));
@@ -44,7 +66,7 @@ export const useCargaAcademica = () => {
       return true;
     } catch (error) {
       console.error("Error asignando bloque:", error);
-      throw new Error("No se pudo asignar el bloque horario.");
+      throw error;
     }
   };
 

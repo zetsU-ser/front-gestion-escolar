@@ -1,12 +1,21 @@
 import { styled } from '@mui/material/styles';
-import { DialogTitle, DialogActions, Button, Dialog, DialogContent, TextField, MenuItem } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Stack, MenuItem } from '@mui/material';
+
+export const StyledDialog = styled(Dialog)(({ theme }) => ({
+}));
 
 export const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   fontWeight: 'bold',
 }));
 
+export const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
+}));
+
 export const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
   padding: theme.spacing(3),
+}));
+
+export const StyledButton = styled(Button)(({ theme }) => ({
 }));
 
 export const SaveButton = styled(Button)(({ theme }) => ({
@@ -15,17 +24,11 @@ export const SaveButton = styled(Button)(({ theme }) => ({
   paddingRight: theme.spacing(3),
 }));
 
-export const StyledDialog = styled(Dialog)(({ theme }) => ({
-}));
-
-export const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
-}));
-
 export const StyledTextField = styled(TextField)(({ theme }) => ({
 }));
 
-export const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+export const StyledStack = styled(Stack)(({ theme }) => ({
 }));
 
-export const StyledButton = styled(Button)(({ theme }) => ({
+export const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 }));

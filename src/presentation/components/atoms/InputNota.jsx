@@ -16,10 +16,10 @@ export const InputNota = ({ value, onChange, disabled, label }) => {
       variant="outlined"
       size="small"
       label={label || 'Nota'}
-      value={value}
+      value={value || ''}
       onChange={handleChange}
       disabled={disabled}
-      inputProps={{ inputMode: 'decimal', maxLength: 3 }}
+      slotProps={{ htmlInput: { inputMode: 'decimal', maxLength: 3 } }}
       sx={{ width: '80px' }}
       placeholder="e.g. 7.0"
     />

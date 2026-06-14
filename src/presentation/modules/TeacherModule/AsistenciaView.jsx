@@ -1,32 +1,83 @@
-import { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Box, CircularProgress, Stack } from '@mui/material';
+import { useContext, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { AuthContext } from '../../../application/context/AuthContext';
 import { useCursos } from '../../../application/use-cases/useCursos';
+import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
+
 import { alumnoCursoRepository } from '../../../infrastructure/repositories/HttpCursosRepository';
+import { asistenciaRepository } from '../../../infrastructure/repositories/HttpAsistenciaRepository';
+
 import { TablaAsistencia } from '../../components/organisms/TablaAsistencia';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { FiltroNivelCurso } from '../../components/molecules/FiltroNivelCurso';
+import { DetalleCursoInfo } from '../../components/molecules/DetalleCursoInfo';
 import { BotonAccion } from '../../components/atoms/BotonAccion';
-import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { DashboardContainer, StyledPaper, Title } from './ProfesorDashboard.styles';
+
+import { Save as SaveIcon } from '@mui/icons-material';
+
+import { 
+  DashboardContainer, 
+  StyledPaper, 
+  StyledDivider, 
+  FilterPaper, 
+  SectionTitle, 
+  LoadingContainer, 
+  ButtonContainer, 
+  LoadingSpinner, 
+  EmptyStatePaper, 
+  EmptyStateText 
+} from './ProfesorDashboard.styles';
 
 export const AsistenciaView = () => {
-  const { cursoId, asignaturaId } = useParams();
-  const navigate = useNavigate();
+  const { cursoId } = useParams();
   const { currentUser } = useContext(AuthContext);
-  const { cursos, loading: loadingCursos } = useCursos();
   
+  const { cursos, loading: loadingCursos } = useCursos();
+  const { cargas, loading: loadingCargas } = useCargaAcademica();
+  
+  // maneja el estado de la tabla interactiva y datos de alumnos
   const [alumnosCurso, setAlumnosCurso] = useState([]);
-  const [loadingAlumnos, setLoadingAlumnos] = useState(true);
+  const [loadingAlumnos, setLoadingAlumnos] = useState(false);
   const [estadoAsistencia, setEstadoAsistencia] = useState({});
   const [loadingGuardar, setLoadingGuardar] = useState(false);
 
-  const cursoActual = cursos.find(c => String(c.id) === String(cursoId));
+  // maneja el estado de los filtros
+  const [nivelFiltro, setNivelFiltro] = useState('');
+  const [cursoFiltro, setCursoFiltro] = useState(cursoId || '');
+
+  // extrae los cursos que dicta el docente
+  const profesorId = currentUser?.profile?.id;
+  const miHorario = cargas.filter(c => c.docenteId === profesorId);
+  const misCursosIds = [...new Set(miHorario.map(c => c.cursoId))];
+  const misCursos = cursos.filter(c => misCursosIds.includes(c.id));
+
+  const cursoActual = cursos.find(c => String(c.id) === String(cursoFiltro));
+
+  // filtra las opciones de cursos según el nivel seleccionado
+  const cursosOpciones = misCursos
+    .filter(c => {
+      if (!nivelFiltro) return true;
+      if (nivelFiltro === 'BASICA') return c.nivel?.includes('Básico');
+      if (nivelFiltro === 'MEDIA') return c.nivel?.includes('Medio');
+      return true;
+    })
+    .map(c => ({
+      value: c.id,
+      label: `${c.nivel} ${c.letra}`
+    }));
+
+  useEffect(() => {
+    if (cursoId) {
+      setCursoFiltro(cursoId);
+    }
+  }, [cursoId]);
 
   useEffect(() => {
     const fetchAlumnos = async () => {
       setLoadingAlumnos(true);
       try {
-        const asignaciones = await alumnoCursoRepository.getByCurso(cursoId);
+        const asignaciones = await alumnoCursoRepository.getByCurso(cursoFiltro);
         const listaAlumnos = asignaciones.map(a => a.alumno).filter(Boolean);
         setAlumnosCurso(listaAlumnos);
       } catch (err) {
@@ -35,19 +86,28 @@ export const AsistenciaView = () => {
         setLoadingAlumnos(false);
       }
     };
-    if (cursoId) fetchAlumnos();
-  }, [cursoId]);
-
-  // Inicializar estado asumiendo todos presentes si no hay estado guardado
-  useEffect(() => {
-    if (alumnosCurso.length > 0 && Object.keys(estadoAsistencia).length === 0) {
-      const initialState = {};
-      alumnosCurso.forEach(a => {
-        initialState[a.id] = { estado: 'PRESENTE', justificado: false };
-      });
-      setEstadoAsistencia(initialState);
+    if (cursoFiltro) {
+      fetchAlumnos();
+    } else {
+      setAlumnosCurso([]);
     }
-  }, [alumnosCurso]);
+  }, [cursoFiltro]);
+
+  // inicializa el estado de asistencia cargando de localStorage o asumiendo PRESENTE
+  useEffect(() => {
+    if (alumnosCurso.length > 0) {
+      const stored = localStorage.getItem(`asistencia_curso_${cursoFiltro}`);
+      if (stored) {
+        setEstadoAsistencia(JSON.parse(stored));
+      } else {
+        const initialState = {};
+        alumnosCurso.forEach(a => {
+          initialState[a.id] = { estado: 'PRESENTE', justificado: false };
+        });
+        setEstadoAsistencia(initialState);
+      }
+    }
+  }, [alumnosCurso, cursoFiltro]);
 
   const handleEstadoChange = (alumnoId, nuevoEstado) => {
     setEstadoAsistencia(prev => ({
@@ -55,7 +115,6 @@ export const AsistenciaView = () => {
       [alumnoId]: { 
         ...prev[alumnoId], 
         estado: nuevoEstado,
-        // Si cambia a presente, forzamos justificado a false
         justificado: nuevoEstado === 'PRESENTE' ? false : prev[alumnoId]?.justificado || false
       }
     }));
@@ -72,8 +131,7 @@ export const AsistenciaView = () => {
     setLoadingGuardar(true);
     try {
       const payload = {
-        curso_id: Number(cursoId),
-        asignatura_id: Number(asignaturaId),
+        curso_id: Number(cursoFiltro),
         profesor_id: currentUser?.profile?.id,
         fecha: new Date().toISOString().split('T')[0],
         alumnos: alumnosCurso.map(a => ({
@@ -83,9 +141,9 @@ export const AsistenciaView = () => {
         }))
       };
 
-      // Simular guardado hacia ms-asistencia
-      await new Promise(r => setTimeout(r, 1000));
-      console.log('Payload a ms-asistencia:', payload);
+      // Persistencia real usando el repositorio
+      await asistenciaRepository.create(payload);
+      
       alert('¡Asistencia guardada con éxito!');
     } catch (error) {
       alert('Error al guardar asistencia.');
@@ -94,50 +152,75 @@ export const AsistenciaView = () => {
     }
   };
 
-  if (loadingAlumnos || loadingCursos) {
+  if (loadingCargas || loadingCursos) {
     return (
       <DashboardContainer>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-          <CircularProgress />
-        </Box>
+        <LoadingContainer>
+          <LoadingSpinner />
+        </LoadingContainer>
       </DashboardContainer>
     );
   }
 
   return (
     <DashboardContainer>
-      <StyledPaper elevation={4}>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-          <BotonAccion variant="text" onClick={() => navigate('/profesor')}>
-            <ArrowBackIcon /> Volver al Horario
-          </BotonAccion>
-        </Stack>
+      {/* muestra el encabezado de la página */}
+      <HeaderModulo titulo="Registro de Asistencia Diaria" correo={currentUser?.email} />
+      <StyledDivider />
 
-        <Title variant="h4" gutterBottom>
-          Registro de Asistencia Diaria
-        </Title>
-        <Typography variant="h6" color="primary" sx={{ mb: 4 }}>
-          {cursoActual ? `Curso: ${cursoActual.nivel} ${cursoActual.letra}` : 'Curso'} | Fecha: {new Date().toLocaleDateString('es-CL')}
-        </Typography>
-
-        <TablaAsistencia
-          alumnos={alumnosCurso}
-          estadoAsistencia={estadoAsistencia}
-          onEstadoChange={handleEstadoChange}
-          onJustificarChange={handleJustificarChange}
-          disabled={loadingGuardar}
+      <FilterPaper>
+        <SectionTitle variant="h6">
+          Selecciona Nivel y Curso para operar
+        </SectionTitle>
+        <FiltroNivelCurso
+          nivelSeleccionado={nivelFiltro}
+          onNivelChange={(e) => {
+            setNivelFiltro(e.target.value);
+            setCursoFiltro('');
+          }}
+          cursoSeleccionado={cursoFiltro}
+          onCursoChange={(e) => setCursoFiltro(e.target.value)}
+          cursosOpciones={cursosOpciones}
+          loadingCursos={loadingCursos}
         />
+      </FilterPaper>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-          <BotonAccion 
-            startIcon={<SaveIcon />} 
-            onClick={handleGuardar}
-            loading={loadingGuardar}
-          >
-            Guardar Asistencia
-          </BotonAccion>
-        </Box>
-      </StyledPaper>
+      {/* renderiza el detalle de información si hay curso */}
+      {cursoFiltro && (
+        <DetalleCursoInfo curso={cursoActual} />
+      )}
+
+      {/* renderiza la tabla de alumnos y toma de asistencia */}
+      {loadingAlumnos ? (
+        <LoadingContainer>
+          <LoadingSpinner />
+        </LoadingContainer>
+      ) : cursoFiltro && alumnosCurso.length > 0 ? (
+        <>
+          <TablaAsistencia
+            alumnos={alumnosCurso}
+            estadoAsistencia={estadoAsistencia}
+            onEstadoChange={handleEstadoChange}
+            onJustificarChange={handleJustificarChange}
+            disabled={loadingGuardar}
+          />
+
+          <ButtonContainer>
+            <BotonAccion 
+              startIcon={<SaveIcon />} 
+              onClick={handleGuardar}
+              loading={loadingGuardar}
+              color="primary"
+            >
+              Guardar Asistencia
+            </BotonAccion>
+          </ButtonContainer>
+        </>
+      ) : cursoFiltro ? (
+        <EmptyStatePaper>
+          <EmptyStateText>No hay alumnos registrados en este curso.</EmptyStateText>
+        </EmptyStatePaper>
+      ) : null}
     </DashboardContainer>
   );
 };

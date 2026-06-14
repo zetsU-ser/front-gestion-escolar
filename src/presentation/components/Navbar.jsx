@@ -60,43 +60,7 @@ export const Navbar = ({ children }) => {
     minHeight: '100vh',
   };
 
-  // LAYOUT PARA DOCENTES: Navbar superior
-  if (isTeacher) {
-    return (
-      <Box sx={{ ...backgroundStyle, display: 'flex', flexDirection: 'column' }}>
-        <StyledAppBar position="sticky">
-          <Container maxWidth="xl">
-            <Toolbar disableGutters>
-              <LogoText
-                variant="h6"
-                noWrap
-                component="div"
-                onClick={() => navigate(dashboardPath)}
-              >
-                COLEGIO <LogoSpan component="span">MS-GA</LogoSpan>
-              </LogoText>
-
-              <NavContainer>
-                <LogoutButton
-                  onClick={handleLogout}
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                >
-                  Salir
-                </LogoutButton>
-              </NavContainer>
-            </Toolbar>
-          </Container>
-        </StyledAppBar>
-        <Box component="main" sx={{ flexGrow: 1, pb: 4, pt: 2 }}>
-          {children}
-        </Box>
-      </Box>
-    );
-  }
-
-  // LAYOUT PARA ADMIN Y COORDINADOR: Sidebar lateral permanente
+  // LAYOUT PARA TODOS: Sidebar lateral permanente
   return (
     <Box sx={{ display: 'flex', ...backgroundStyle }}>
       <Drawer
@@ -136,6 +100,15 @@ export const Navbar = ({ children }) => {
               {renderMenuItem('Gestión Académica', '/cursos', <ClassIcon />)}
               {renderMenuItem('Carga Académica', '/coordinador/carga-academica', <AssignmentIcon />)}
               {renderMenuItem('Mensajería', '/coordinador/mensajeria', <EmailIcon />)}
+            </>
+          )}
+
+          {isTeacher && (
+            <>
+              {/* Para Asistencia y Evaluaciones requerimos el curso y asignatura, los mandamos al dashboard para que elijan */}
+              {renderMenuItem('Asistencia', '/profesor/asistencia', <AssignmentIcon />)}
+              {renderMenuItem('Evaluaciones', '/profesor/evaluaciones', <AssignmentIcon />)}
+              {renderMenuItem('Mensajería', '/profesor/mensajeria', <EmailIcon />)}
             </>
           )}
         </List>

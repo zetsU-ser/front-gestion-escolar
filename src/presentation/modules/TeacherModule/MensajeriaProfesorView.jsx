@@ -1,6 +1,7 @@
-import { Divider } from '@mui/material';
+
 import { FormularioMensajeriaGlobal } from '../../components/organisms/FormularioMensajeriaGlobal';
 import { MainContainer } from '../MensajeriaModule/MensajeriaView.styles';
+import { StyledDivider } from './ProfesorDashboard.styles';
 import { HeaderModulo } from '../../components/molecules/HeaderModulo';
 import { useContext } from 'react';
 import { AuthContext } from '../../../application/context/AuthContext';
@@ -27,7 +28,7 @@ export const MensajeriaProfesorView = () => {
         correo={currentUser?.email}
       />
 
-      <Divider sx={{ mb: 4 }} />
+      <StyledDivider />
 
       <FormularioMensajeriaGlobal
         onSubmit={handleSubmit}

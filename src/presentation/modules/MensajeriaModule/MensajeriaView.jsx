@@ -1,14 +1,16 @@
-import { Divider } from '@mui/material';
+import { useContext, useState } from 'react';
+
+import { AuthContext } from '../../../application/context/AuthContext';
+import { useMensajeriaAdmin } from './hooks/useMensajeriaAdmin';
+
 import { FormularioMensajeriaGlobal } from '../../components/organisms/FormularioMensajeriaGlobal';
 import { HeaderModulo } from '../../components/molecules/HeaderModulo';
-import { useAuth } from '../../../application/context/AuthContext';
-import { MainContainer } from './MensajeriaView.styles';
-import { useMensajeriaAdmin } from './hooks/useMensajeriaAdmin';
+import { MainContainer, StyledDivider } from './MensajeriaView.styles';
 
 // define la página para enviar comunicados oficiales a los apoderados
 // utiliza FormularioMensajeriaGlobal como organismo principal
 export const MensajeriaView = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useContext(AuthContext);
   
   // extrae toda la lógica y estado desde el hook personalizado (Patrón Custom Hook / Presenter)
   const {
@@ -30,7 +32,7 @@ export const MensajeriaView = () => {
       />
 
 
-      <Divider sx={{ mb: 4 }} /> {/* separador visual idéntico al dashboard */}
+      <StyledDivider /> {/* separador visual idéntico al dashboard */}
 
       <FormularioMensajeriaGlobal
         onSubmit={handleSubmit}

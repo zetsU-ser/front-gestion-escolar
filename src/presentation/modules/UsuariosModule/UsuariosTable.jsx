@@ -1,10 +1,5 @@
 import { useState } from 'react';
-import {
-  Box,
-  CircularProgress,
-  Alert,
-  Divider
-} from '@mui/material';
+
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
 import { useAuth } from '../../../application/context/AuthContext';
 import { UsuarioFormDialog } from './UsuarioFormDialog';
@@ -13,7 +8,11 @@ import { TablaUsuariosGlobal } from '../../components/organisms/TablaUsuariosGlo
 import {
   LoadingContainer,
   MainContainer,
-  AddButton
+  AddButton,
+  StyledDivider,
+  ButtonContainer,
+  ErrorAlert,
+  LoadingSpinner
 } from './UsuariosTable.styles';
 
 export const UsuariosTable = ({ filtroTipo = null, titulo = 'Usuarios' }) => {
@@ -51,30 +50,30 @@ export const UsuariosTable = ({ filtroTipo = null, titulo = 'Usuarios' }) => {
 
   if (loading) return (
     <LoadingContainer>
-      <CircularProgress />
+      <LoadingSpinner />
     </LoadingContainer>
   );
 
   return (
     <MainContainer>
       {/* muestra el encabezado del módulo */}
-      <HeaderModulo 
-        titulo={titulo} 
+      <HeaderModulo
+        titulo={titulo}
         correo={currentUser?.email}
       />
 
-      <Divider sx={{ mb: 4 }} /> {/* separador visual idéntico al dashboard */}
+      <StyledDivider /> {/* separador visual idéntico al dashboard */}
 
       {puedeGestionar && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <ButtonContainer>
           <AddButton variant="contained" onClick={handleAgregar}>
             Nuevo Usuario
           </AddButton>
-        </Box>
+        </ButtonContainer>
       )}
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {errorGuardar && <Alert severity="error" sx={{ mb: 2 }}>{errorGuardar}</Alert>}
+      {error && <ErrorAlert severity="error">{error}</ErrorAlert>}
+      {errorGuardar && <ErrorAlert severity="error">{errorGuardar}</ErrorAlert>}
 
       {/* Organismo: Tabla de Usuarios Atomizada */}
       <TablaUsuariosGlobal

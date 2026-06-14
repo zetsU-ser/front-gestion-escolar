@@ -2,13 +2,12 @@ import { useState, useContext } from 'react';
 import { AuthContext } from '../../../application/context/AuthContext';
 import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
 import { useCursos } from '../../../application/use-cases/useCursos';
+import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
 
 import { HeaderModulo } from '../../components/molecules/HeaderModulo';
 import { PanelDashboard } from '../../components/organisms/PanelDashboard';
 import { DetalleMetricasProfesor } from '../../components/organisms/DetalleMetricasProfesor';
-import { DashboardContainer, StyledDivider } from './ProfesorDashboard.styles';
-
-import { CircularProgress, Box } from '@mui/material';
+import { DashboardContainer, StyledDivider, LoadingContainer, LoadingSpinner } from './ProfesorDashboard.styles';
 
 const ASIGNATURAS_MOCK = [
   { id: 1, nombre: 'Matemáticas' },
@@ -29,51 +28,34 @@ export const ProfesorDashboard = () => {
   const { currentUser } = useContext(AuthContext);
   const { cargas, loading: loadingCargas } = useCargaAcademica();
   const { cursos, loading: loadingCursos } = useCursos();
+  const { asignaciones } = useAsignacionesAlumnos();
 
-  const [cursoSeleccionado, setCursoSeleccionado] = useState('');
-  const [asignaturaSeleccionada, setAsignaturaSeleccionada] = useState('');
+  // maneja el estado de la tabla interactiva
   const [metricaSeleccionada, setMetricaSeleccionada] = useState('horario'); // por defecto muestra el horario
 
   if (loadingCargas || loadingCursos) {
     return (
       <DashboardContainer>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <CircularProgress />
-        </Box>
+        <LoadingContainer>
+          <LoadingSpinner />
+        </LoadingContainer>
       </DashboardContainer>
     );
   }
 
-  // Identificar el ID interno del profesor en base de datos.
   const profesorId = currentUser?.profile?.id;
 
-  // Filtrar la carga que pertenece exclusivamente a este docente
   const miHorario = cargas.filter(c => c.docenteId === profesorId);
 
-  // Extraer cursos únicos que dicta
   const misCursosIds = [...new Set(miHorario.map(c => c.cursoId))];
   const misCursos = cursos.filter(c => misCursosIds.includes(c.id));
-
-  // Extraer asignaturas únicas que dicta
-  const misAsignaturasIds = [...new Set(miHorario.map(c => c.asignaturaId))];
-  const misAsignaturas = ASIGNATURAS_MOCK.filter(a => misAsignaturasIds.includes(a.id));
-
-  const cursosOpciones = misCursos.map(c => ({
-    value: c.id,
-    label: `${c.nivel} ${c.letra}`
-  }));
-
-  const asignaturasOpciones = misAsignaturas.map(a => ({
-    value: a.id,
-    label: a.nombre
-  }));
 
   const getDisplayData = (carga) => {
     const curso = cursos.find(c => c.id === carga.cursoId);
     const asignatura = ASIGNATURAS_MOCK.find(a => a.id === carga.asignaturaId);
     const bloque = BLOQUES.find(b => b.id === carga.bloqueHorario);
     return {
-      cursoStr: curso ? `${curso.nivel} ${curso.letra}` : 'N/A',
+      docenteStr: curso ? `${curso.nivel} ${curso.letra}` : 'N/A', 
       asignaturaStr: asignatura ? asignatura.nombre : 'N/A',
       diaStr: carga.diaSemana,
       bloqueStr: bloque ? bloque.label : 'N/A'
@@ -82,14 +64,15 @@ export const ProfesorDashboard = () => {
 
   const metricas = [
     { id: 'cursos', valor: misCursos.length, titulo: 'Cursos Asignados' },
-    { id: 'asignaturas', valor: misAsignaturas.length, titulo: 'Asignaturas' },
     { id: 'horario', valor: miHorario.length, titulo: 'Bloques Horarios' }
   ];
 
   return (
     <DashboardContainer>
+      {/* muestra el encabezado de la página */}
       <HeaderModulo 
         titulo="Panel de Docentes"
+        correo={currentUser?.email}
       />
 
       <StyledDivider />
@@ -99,16 +82,13 @@ export const ProfesorDashboard = () => {
         onSelectMetrica={(id) => setMetricaSeleccionada(id === metricaSeleccionada ? null : id)} 
       />
 
+      {/* muestra la tabla interactiva según la tarjeta clickeada */}
       <DetalleMetricasProfesor 
         metricaId={metricaSeleccionada}
         miHorario={miHorario}
         getDisplayData={getDisplayData}
-        cursosOpciones={cursosOpciones}
-        asignaturasOpciones={asignaturasOpciones}
-        cursoSeleccionado={cursoSeleccionado}
-        asignaturaSeleccionada={asignaturaSeleccionada}
-        onCursoChange={(e) => setCursoSeleccionado(e.target.value)}
-        onAsignaturaChange={(e) => setAsignaturaSeleccionada(e.target.value)}
+        cursos={misCursos}
+        asignaciones={asignaciones}
       />
 
     </DashboardContainer>

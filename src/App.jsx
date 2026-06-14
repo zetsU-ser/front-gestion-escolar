@@ -102,12 +102,12 @@ function App() {
                   <ProfesorDashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/profesor/asistencia/:cursoId/:asignaturaId" element={
+              <Route path="/profesor/asistencia" element={
                 <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <AsistenciaView />
                 </ProtectedRoute>
               } />
-              <Route path="/profesor/evaluaciones/:cursoId/:asignaturaId" element={
+              <Route path="/profesor/evaluaciones" element={
                 <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <EvaluacionesView />
                 </ProtectedRoute>

@@ -1,5 +1,6 @@
-import { TableRow, TableCell } from '@mui/material';
+import { TableRow, TableCell, Typography } from '@mui/material';
 import { InputNota } from '../atoms/InputNota';
+import { calcularPromedio } from '../../../application/utils/calculadoras';
 
 /**
  * Molécula: FilaTablaEvaluacion
@@ -11,6 +12,8 @@ export const FilaTablaEvaluacion = ({
   onNotaChange,
   disabled
 }) => {
+  const promedio = calcularPromedio(notas.nota1, notas.nota2, notas.nota3);
+
   return (
     <TableRow>
       <TableCell>{alumno.rut}</TableCell>
@@ -35,6 +38,11 @@ export const FilaTablaEvaluacion = ({
           onChange={(val) => onNotaChange(alumno.id, 'nota3', val)}
           disabled={disabled}
         />
+      </TableCell>
+      <TableCell>
+        <Typography fontWeight="bold" color={promedio >= 4.0 ? 'success.main' : 'error.main'}>
+          {promedio || '-'}
+        </Typography>
       </TableCell>
     </TableRow>
   );

@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 // importa hooks globales y lógica de negocio
 import { AuthContext } from '../../../application/context/AuthContext';
@@ -14,14 +14,12 @@ import { HeaderModulo } from '../../components/molecules/HeaderModulo';
 import { DetalleMetricasCoordinador } from '../../components/organisms/DetalleMetricasCoordinador';
 import {
   DashboardContainer,
-  StyledDivider,
-  ActionStack
+  StyledDivider
 } from './CoordinadorDashboard.styles';
 
 // define la vista principal del dashboard del coordinador
 export const CoordinadorDashboard = () => {
   const { currentUser } = useContext(AuthContext); // obtiene la información del usuario autenticado
-  const navigate = useNavigate(); // inicializa la navegación
 
   // carga toda la data global necesaria para las métricas
   const { alumnos } = useAlumnos();

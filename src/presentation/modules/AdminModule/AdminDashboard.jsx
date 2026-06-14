@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { AuthContext } from '../../../application/context/AuthContext';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
@@ -15,7 +15,6 @@ import {
 
 export const AdminDashboard = () => {
   const { currentUser } = useContext(AuthContext);
-  const navigate = useNavigate();
 
   const { alumnos } = useAlumnos();
   const { usuarios: personal } = useUsuarios();
