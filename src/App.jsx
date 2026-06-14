@@ -111,7 +111,17 @@ function App() {
                   <AsistenciaView />
                 </ProtectedRoute>
               } />
+              <Route path="/profesor/asistencia/:cursoId" element={
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
+                  <AsistenciaView />
+                </ProtectedRoute>
+              } />
               <Route path="/profesor/evaluaciones" element={
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
+                  <EvaluacionesView />
+                </ProtectedRoute>
+              } />
+              <Route path="/profesor/evaluaciones/:cursoId" element={
                 <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <EvaluacionesView />
                 </ProtectedRoute>

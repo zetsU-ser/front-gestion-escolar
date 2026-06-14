@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../../../application/context/AuthContext';
 import { useCursos } from '../../../application/use-cases/useCursos';
@@ -31,6 +31,7 @@ import {
 
 export const EvaluacionesView = () => {
   const { cursoId } = useParams();
+  const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
   
   const { cursos, loading: loadingCursos } = useCursos();
@@ -177,7 +178,15 @@ export const EvaluacionesView = () => {
             setCursoFiltro('');
           }}
           cursoSeleccionado={cursoFiltro}
-          onCursoChange={(e) => setCursoFiltro(e.target.value)}
+          onCursoChange={(e) => {
+            const newCurso = e.target.value;
+            setCursoFiltro(newCurso);
+            if (newCurso) {
+              navigate(`/profesor/evaluaciones/${newCurso}`, { replace: true });
+            } else {
+              navigate(`/profesor/evaluaciones`, { replace: true });
+            }
+          }}
           cursosOpciones={cursosOpciones}
           loadingCursos={loadingCursos}
         />
