@@ -29,7 +29,7 @@ export const TablaPersonalAdmin = ({ usuarios = [], titulo = "Detalle de Persona
           <StyledTableHeadRow>
             <HeaderCell>Nombre Completo</HeaderCell>
             <HeaderCell>Rol</HeaderCell>
-            <HeaderCell>Especificación</HeaderCell>
+            <HeaderCell>Correo</HeaderCell>
           </StyledTableHeadRow>
         </TableHead>
         <TableBody>

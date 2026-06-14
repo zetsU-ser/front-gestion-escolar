@@ -4,6 +4,7 @@ import { AuthContext } from '../../../application/context/AuthContext';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
 import { useCursos } from '../../../application/use-cases/useCursos';
+import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
 import { PanelDashboard } from '../../components/organisms/PanelDashboard';
 import { DetalleMetricasAdmin } from '../../components/organisms/DetalleMetricasAdmin';
 import { HeaderModulo } from '../../components/molecules/HeaderModulo';
@@ -19,6 +20,7 @@ export const AdminDashboard = () => {
   const { alumnos } = useAlumnos();
   const { usuarios: personal } = useUsuarios();
   const { cursos } = useCursos();
+  const { asignaciones } = useAsignacionesAlumnos();
   
   // maneja el estado de la tabla interactiva
   const [metricaSeleccionada, setMetricaSeleccionada] = useState(null);
@@ -50,6 +52,7 @@ export const AdminDashboard = () => {
         usuarios={personal} 
         cursos={cursos} 
         alumnos={alumnos} 
+        asignaciones={asignaciones}
       />
     </DashboardContainer>
   );
