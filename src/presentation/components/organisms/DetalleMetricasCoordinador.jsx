@@ -15,7 +15,7 @@ export const DetalleMetricasCoordinador = ({ metricaId, docentes = [], cursos = 
       return <TablaCursosAdmin cursos={cursos} asignaciones={asignaciones} />;
     
     case 'alumnos': 
-      return <TablaAlumnosAdmin alumnos={alumnos} cursos={cursos} />;
+      return <TablaAlumnosAdmin alumnos={alumnos} cursos={cursos} asignaciones={asignaciones} />;
       
     default: 
       return null;
