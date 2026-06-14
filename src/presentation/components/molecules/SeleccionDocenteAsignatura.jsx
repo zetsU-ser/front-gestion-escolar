@@ -11,26 +11,33 @@ export const SeleccionDocenteAsignatura = ({
   docentesOpciones = [],
   asignaturasOpciones = [],
   loadingDocentes = false
-}) => (
-  <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} flexWrap="wrap">
-    <SelectorDesplegable
-      label="Docente"
-      name="docenteId"
-      value={form.docenteId}
-      onChange={onFieldChange}
-      opciones={docentesOpciones}
-      required
-      disabled={loadingDocentes}
-      sx={{ flex: 1, minWidth: '200px' }}
-    />
-    <SelectorDesplegable
-      label="Asignatura"
-      name="asignaturaId"
-      value={form.asignaturaId}
-      onChange={onFieldChange}
-      opciones={asignaturasOpciones}
-      required
-      sx={{ flex: 1, minWidth: '200px' }}
-    />
-  </Stack>
-);
+}) => {
+  // Filtrar docentes basados en la asignatura seleccionada
+  const docentesFiltrados = form.asignaturaId 
+    ? docentesOpciones.filter(d => d.asignaturaId === form.asignaturaId)
+    : [];
+
+  return (
+    <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} flexWrap="wrap">
+      <SelectorDesplegable
+        label="Asignatura"
+        name="asignaturaId"
+        value={form.asignaturaId}
+        onChange={onFieldChange}
+        opciones={asignaturasOpciones}
+        required
+        sx={{ flex: 1, minWidth: '200px' }}
+      />
+      <SelectorDesplegable
+        label="Docente"
+        name="docenteId"
+        value={form.docenteId}
+        onChange={onFieldChange}
+        opciones={docentesFiltrados}
+        required
+        disabled={!form.asignaturaId || loadingDocentes}
+        sx={{ flex: 1, minWidth: '200px' }}
+      />
+    </Stack>
+  );
+};

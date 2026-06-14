@@ -16,13 +16,13 @@ import {
 import { FilaPersonal } from '../molecules/FilaPersonal';
 
 // define el componente TablaPersonalAdmin para mostrar los usuarios
-export const TablaPersonalAdmin = ({ usuarios = [] }) => {
+export const TablaPersonalAdmin = ({ usuarios = [], titulo = "Detalle de Personal Registrado" }) => {
   const personal = usuarios.filter(u => u.rol !== 'ALUMNO'); // excluye a los alumnos de la lista
 
   return (
     <DetailWrapper component={Paper}>
       <HeaderBox>
-        <Typography variant="h6">Detalle de Personal Registrado</Typography>
+        <Typography variant="h6">{titulo}</Typography>
       </HeaderBox>
       <Table>
         <TableHead>

@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Paper, Typography } from '@mui/material';
+import { Paper, Typography, Divider } from '@mui/material';
 import { useCursos } from '../../../application/use-cases/useCursos';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
 import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
+import { useAuth } from '../../../application/context/AuthContext';
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
 import { FiltroNivelCurso } from '../../components/molecules/FiltroNivelCurso';
 import { FormularioAsignacionHorario } from '../../components/organisms/FormularioAsignacionHorario';
 import { VistaHorario } from '../../components/organisms/VistaHorario';
-import { MainContainer, HeaderContainer, TitleText } from './CargaAcademicaView.styles';
+import { MainContainer } from './CargaAcademicaView.styles';
 
 const ASIGNATURAS_MOCK = [
   { id: 1, nombre: 'Matemáticas' },
@@ -31,6 +33,7 @@ export const CargaAcademicaView = () => {
   const { cursos, loading: loadingCursos } = useCursos();
   const { usuarios: docentes, loading: loadingDocentes } = useUsuarios('DOCENTE');
   const { cargas, loading: loadingCargas, asignarBloque, eliminarBloque } = useCargaAcademica();
+  const { currentUser } = useAuth();
 
   // Estados locales para la selección jerárquica
   const [nivel, setNivel] = useState('');
@@ -51,7 +54,8 @@ export const CargaAcademicaView = () => {
 
   const docentesOpciones = docentes.map(d => ({
     value: d.id,
-    label: `${d.nombre} ${d.apellido}`
+    label: `${d.nombre} ${d.apellido}`,
+    asignaturaId: d.asignatura_id
   }));
 
   const asignaturasOpciones = ASIGNATURAS_MOCK.map(a => ({
@@ -84,9 +88,12 @@ export const CargaAcademicaView = () => {
 
   return (
     <MainContainer>
-      <HeaderContainer>
-        <TitleText variant="h5">Carga Académica y Horarios</TitleText>
-      </HeaderContainer>
+      <HeaderModulo 
+        titulo="Carga Académica y Horarios" 
+        correo={currentUser?.email}
+      />
+      
+      <Divider sx={{ mb: 4 }} />
 
       {/* 1. Nivel y Curso */}
       <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: '12px' }}>

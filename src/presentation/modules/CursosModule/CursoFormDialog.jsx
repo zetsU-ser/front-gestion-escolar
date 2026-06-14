@@ -15,10 +15,22 @@ const NIVELES = [
   '1° Medio', '2° Medio', '3° Medio', '4° Medio'
 ];
 
-const LETRAS = ['A', 'B', 'C', 'D'];
+const LETRAS = ['A', 'B'];
 
-export const CursoFormDialog = ({ open, onClose, onGuardar }) => {
+export const CursoFormDialog = ({ open, onClose, onGuardar, cursosExistentes = [] }) => {
   const [form, setForm] = useState({ nivel: '', letra: '' });
+
+  // Calcular niveles que aún tienen letras disponibles
+  const nivelesDisponibles = NIVELES.filter(nivel => {
+    const letrasOcupadas = cursosExistentes.filter(c => c.nivel === nivel).map(c => c.letra);
+    return letrasOcupadas.length < LETRAS.length;
+  });
+
+  // Calcular letras disponibles para el nivel seleccionado
+  const letrasOcupadasDelNivel = cursosExistentes
+    .filter(c => c.nivel === form.nivel)
+    .map(c => c.letra);
+  const letrasDisponibles = LETRAS.filter(letra => !letrasOcupadasDelNivel.includes(letra));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -38,9 +50,9 @@ export const CursoFormDialog = ({ open, onClose, onGuardar }) => {
               fullWidth
               required
               value={form.nivel}
-              onChange={(e) => setForm({ ...form, nivel: e.target.value })}
+              onChange={(e) => setForm({ nivel: e.target.value, letra: '' })}
             >
-              {NIVELES.map((n) => (
+              {nivelesDisponibles.map((n) => (
                 <MenuItem key={n} value={n}>{n}</MenuItem>
               ))}
             </TextField>
@@ -49,10 +61,11 @@ export const CursoFormDialog = ({ open, onClose, onGuardar }) => {
               label="Letra / Paralelo"
               fullWidth
               required
+              disabled={!form.nivel}
               value={form.letra}
               onChange={(e) => setForm({ ...form, letra: e.target.value })}
             >
-              {LETRAS.map((l) => (
+              {letrasDisponibles.map((l) => (
                 <MenuItem key={l} value={l}>{l}</MenuItem>
               ))}
             </TextField>
