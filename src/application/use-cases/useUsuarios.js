@@ -49,7 +49,8 @@ export const useUsuarios = (filtroTipo = null) => {
       const datosParaBackend = {
         ...datosBase,
         tipoUsuario: usuario.rol, 
-        rol: usuario.rol
+        rol: usuario.rol,
+        asignatura_id: datosBase.asignatura_id || null
       };
       
       await usuarioRepository.create(datosParaBackend);
@@ -61,7 +62,9 @@ export const useUsuarios = (filtroTipo = null) => {
   };
 
   const actualizar = async (id, usuario) => {
-    await usuarioRepository.update(id, usuario);
+    const { password, ...datosBackend } = usuario;
+    datosBackend.asignatura_id = datosBackend.asignatura_id || null;
+    await usuarioRepository.update(id, datosBackend);
     await cargarUsuarios();
   };
 
