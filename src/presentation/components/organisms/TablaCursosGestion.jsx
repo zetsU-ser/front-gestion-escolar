@@ -59,7 +59,7 @@ const GrupoFilasGestion = ({ titulo, cursos = [], countAlumnos, isAbierto, onTog
   );
 };
 
-export const TablaCursosGestion = ({ cursos = [], alumnos = [], onDelete, onNavigate }) => {
+export const TablaCursosGestion = ({ cursos = [], asignaciones = [], onDelete, onNavigate }) => {
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({
     basica: true,
     media: true,
@@ -87,7 +87,7 @@ export const TablaCursosGestion = ({ cursos = [], alumnos = [], onDelete, onNavi
   const cursosMedia = sortCursos(cursos.filter(c => c.nivel?.toLowerCase().includes('medio')));
   const cursosOtros = sortCursos(cursos.filter(c => !c.nivel?.toLowerCase().includes('básico') && !c.nivel?.toLowerCase().includes('basico') && !c.nivel?.toLowerCase().includes('medio')));
 
-  const countAlumnos = (cursoId) => alumnos.filter(a => a.cursoId === cursoId).length;
+  const countAlumnos = (cursoId) => asignaciones.filter(asig => asig.curso && asig.curso.id === cursoId).length;
 
   if (cursos.length === 0) {
     return (

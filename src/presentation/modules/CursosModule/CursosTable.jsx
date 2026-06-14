@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Typography, Divider } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useCursos } from '../../../application/use-cases/useCursos';
-import { useAlumnos } from '../../../application/use-cases/useAlumnos';
+import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
 import { CursoFormDialog } from './CursoFormDialog';
 import { useNavigate } from 'react-router-dom';
 import { HeaderModulo } from '../../components/molecules/HeaderModulo';
@@ -15,13 +15,13 @@ import {
 
 export const CursosTable = () => {
   const { cursos, loading, crear, eliminar } = useCursos();
-  const { alumnos, loading: loadingAlumnos } = useAlumnos();
+  const { asignaciones, loading: loadingAsignaciones } = useAsignacionesAlumnos();
   const { currentUser } = useAuth();
   const [open, setOpen] = useState(false);
   
   // Hook de navegación para redirigir a la vista detallada de alumnos por curso
   const navigate = useNavigate();
-  if (loading || loadingAlumnos) return <Typography>Cargando cursos...</Typography>;
+  if (loading || loadingAsignaciones) return <Typography>Cargando cursos...</Typography>;
 
   return (
     <MainContainer>
@@ -47,7 +47,7 @@ export const CursosTable = () => {
       {/* Organismo: Tabla de Cursos Atomizada */}
       <TablaCursosGestion
         cursos={cursos}
-        alumnos={alumnos}
+        asignaciones={asignaciones}
         onDelete={eliminar}
         onNavigate={navigate}
       />
