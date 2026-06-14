@@ -22,10 +22,12 @@ import { AsistenciaView } from './presentation/modules/TeacherModule/AsistenciaV
 import { EvaluacionesView } from './presentation/modules/TeacherModule/EvaluacionesView';
 import { MensajeriaProfesorView } from './presentation/modules/TeacherModule/MensajeriaProfesorView';
 
+import { HomeView } from './presentation/modules/HomeModule/HomeView';
+
 const AuthRedirect = () => {
   const { currentUser, isAdmin, isCoordinador } = useAuth();
 
-  if (!currentUser) return <LoginForm />;
+  if (!currentUser) return <Navigate to="/home" replace />;
 
   // Redireccion por roles
   if (isAdmin()) return <Navigate to="/admin" replace />;
@@ -43,6 +45,8 @@ function App() {
           <Navbar>
             <Routes>
               <Route path="/" element={<AuthRedirect />} />
+              <Route path="/home" element={<HomeView />} />
+              <Route path="/login" element={<LoginForm />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
 
               <Route path="/admin" element={

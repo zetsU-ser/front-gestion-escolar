@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../application/context/AuthContext';
 
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useLogin } from '../../../application/use-cases/useLogin';
 import {
   LoginPaper,
@@ -15,7 +16,8 @@ import {
   FooterText,
   StyledContainer,
   StyledTextField,
-  LoadingSpinner
+  LoadingSpinner,
+  BackButton
 } from './LoginForm.styles';
 
 export const LoginForm = () => {
@@ -47,6 +49,9 @@ export const LoginForm = () => {
 
   return (
     <StyledContainer component="main" maxWidth="xs">
+      <BackButton startIcon={<ArrowBackIcon />} onClick={() => navigate('/home')}>
+        Volver
+      </BackButton>
       <LoginPaper elevation={10}>
         <StyledAvatar>
           <LockOutlinedIcon fontSize="large" />

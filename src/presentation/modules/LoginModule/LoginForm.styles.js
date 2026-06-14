@@ -61,3 +61,16 @@ export const StyledTextField = styled(TextField)(({ theme }) => ({
 
 export const LoadingSpinner = styled(CircularProgress)(({ theme }) => ({
 }));
+
+export const BackButton = styled(Button)(({ theme }) => ({
+  position: 'fixed',
+  top: theme.spacing(4),
+  left: theme.spacing(4),
+  textTransform: 'none',
+  color: theme.palette.text.secondary,
+  fontWeight: 'bold',
+  [theme.breakpoints.down('sm')]: {
+    top: theme.spacing(2),
+    left: theme.spacing(2),
+  },
+}));
