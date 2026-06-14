@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSnackbar } from '../../../application/context/SnackbarContext';
 
 import { Add as AddIcon } from '@mui/icons-material';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
@@ -17,6 +18,7 @@ import {
 export const AlumnosTable = () => {
   const { alumnos, loading, crear, actualizar, eliminar } = useAlumnos();
   const { currentUser } = useAuth();
+  const { showSnackbar } = useSnackbar();
 
   const [open, setOpen] = useState(false);
   const [alumnoEditar, setAlumnoEditar] = useState(null);
@@ -39,8 +41,9 @@ export const AlumnosTable = () => {
         await crear(form);
       }
       handleClose(); // Cierre tras exito
+      showSnackbar("Alumno guardado con éxito", "success");
     } catch (error) {
-      alert("No se pudo guardar la información del alumno: " + error.message);
+      showSnackbar("No se pudo guardar la información del alumno: " + error.message, "error");
     }
   };
 
@@ -70,7 +73,14 @@ export const AlumnosTable = () => {
       <TablaAlumnosGlobal
         alumnos={alumnos}
         onEdit={handleOpen}
-        onDelete={eliminar}
+        onDelete={async (id) => {
+          try {
+            await eliminar(id);
+            showSnackbar("Alumno eliminado con éxito", "success");
+          } catch (error) {
+            showSnackbar("No se pudo eliminar al alumno: " + error.message, "error");
+          }
+        }}
       />
 
       <AlumnoFormDialog

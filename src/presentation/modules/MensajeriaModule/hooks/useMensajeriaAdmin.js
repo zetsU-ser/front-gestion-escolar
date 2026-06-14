@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useMensajeria } from '../../../../application/use-cases/useMensajeria';
 import { useCursos } from '../../../../application/use-cases/useCursos';
+import { useSnackbar } from '../../../../application/context/SnackbarContext';
 import { useAlumnos } from '../../../../application/use-cases/useAlumnos';
 import { alumnoCursoRepository } from '../../../../infrastructure/repositories/HttpCursosRepository';
 
 // define el hook personalizado para separar la lógica de negocio de la vista de administración
 export const useMensajeriaAdmin = () => {
   const { enviarMensaje, loading } = useMensajeria();
+  const { showSnackbar } = useSnackbar();
   const { cursos, loading: loadingCursos } = useCursos();
   const { alumnos, loading: loadingAlumnos } = useAlumnos();
 
@@ -73,9 +75,9 @@ export const useMensajeriaAdmin = () => {
       };
 
       await enviarMensaje(payload);
-      alert(`¡Éxito! Se enviaron ${correosDestino.length} correo(s) correctamente.`);
+      showSnackbar(`¡Éxito! Se enviaron ${correosDestino.length} correo(s) correctamente.`, "success");
     } catch (error) {
-      alert(error.message);
+      showSnackbar(error.message, "error");
     }
   };
 

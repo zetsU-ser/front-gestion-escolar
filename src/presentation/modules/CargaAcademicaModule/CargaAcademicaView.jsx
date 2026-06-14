@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 
 import { AuthContext } from '../../../application/context/AuthContext';
+import { useSnackbar } from '../../../application/context/SnackbarContext';
 import { useCursos } from '../../../application/use-cases/useCursos';
 import { useUsuarios } from '../../../application/use-cases/useUsuarios';
 import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
@@ -39,6 +40,7 @@ const BLOQUES = [
  */
 export const CargaAcademicaView = () => {
   const { currentUser } = useContext(AuthContext);
+  const { showSnackbar } = useSnackbar();
 
   const { cursos, loading: loadingCursos } = useCursos();
   const { usuarios: docentes, loading: loadingDocentes } = useUsuarios('DOCENTE');
@@ -90,9 +92,40 @@ export const CargaAcademicaView = () => {
 
   const handleEliminar = async (id) => {
     if (window.confirm('¿Eliminar esta asignación?')) {
-      try { await eliminarBloque(id); }
-      catch (error) { alert(error.message); }
+      try { 
+        await eliminarBloque(id);
+        showSnackbar('Bloque eliminado exitosamente', 'success');
+      }
+      catch (error) { showSnackbar(error.message, 'error'); }
     }
+  };
+
+  const handleAsignarBloque = async (form) => {
+    // Poka-Yoke: Evitar topes de horario
+
+    // 1. Validar si el curso ya tiene asignado algo en ese día y bloque
+    const cursoOcupado = cargas.find(c => 
+      String(c.cursoId) === String(form.cursoId) && 
+      c.diaSemana === form.diaSemana && 
+      String(c.bloqueHorario) === String(form.bloqueHorario)
+    );
+    if (cursoOcupado) {
+      // Usar throw para que el componente hijo (Formulario) lo atrape y detenga el loading, o manejarlo directamente
+      throw new Error(`El curso ya tiene asignada una clase el ${form.diaSemana} en el Bloque ${form.bloqueHorario}.`);
+    }
+
+    // 2. Validar si el docente ya tiene clases en ese día y bloque (en cualquier curso)
+    const docenteOcupado = cargas.find(c => 
+      String(c.docenteId) === String(form.docenteId) && 
+      c.diaSemana === form.diaSemana && 
+      String(c.bloqueHorario) === String(form.bloqueHorario)
+    );
+    if (docenteOcupado) {
+      throw new Error(`El docente ya se encuentra ocupado dictando clases el ${form.diaSemana} en el Bloque ${form.bloqueHorario}.`);
+    }
+
+    // Si pasa las validaciones, procede a guardar
+    await asignarBloque(form);
   };
 
   return (
@@ -131,7 +164,7 @@ export const CargaAcademicaView = () => {
             asignaturasOpciones={asignaturasOpciones}
             loadingDocentes={loadingDocentes}
             loadingCargas={loadingCargas}
-            onAsignar={asignarBloque}
+            onAsignar={handleAsignarBloque}
           />
 
           <VistaHorario
