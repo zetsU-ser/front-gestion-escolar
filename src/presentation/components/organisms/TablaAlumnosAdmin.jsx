@@ -16,7 +16,7 @@ import {
 import { GrupoFilasAlumnos } from '../molecules/GrupoFilasAlumnos';
 
 // define el componente TablaAlumnosAdmin para cruzar y mostrar datos de alumnos
-export const TablaAlumnosAdmin = ({ alumnos = [], cursos = [] }) => {
+export const TablaAlumnosAdmin = ({ alumnos = [], cursos = [], asignaciones = [] }) => {
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({ // estado para manejar el despliegue de las listas
     basica: true,
     media: true,
@@ -32,7 +32,8 @@ export const TablaAlumnosAdmin = ({ alumnos = [], cursos = [] }) => {
   const alumnosOtros = [];
 
   alumnos.forEach(alumno => { // recorre a los alumnos para clasificarlos
-    const curso = cursos.find(c => c.id === alumno.cursoId); // busca el curso asignado al alumno
+    const asignacion = asignaciones.find(a => a.alumno?.id === alumno.id); // busca si el alumno tiene asignación
+    const curso = asignacion ? cursos.find(c => c.id === asignacion.curso?.id) : null; // recupera el curso asignado
     alumno.cursoObj = curso; // inyecta el objeto curso entero en el alumno
 
     if (curso) {
