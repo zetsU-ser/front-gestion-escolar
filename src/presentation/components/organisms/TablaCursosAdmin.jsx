@@ -16,7 +16,7 @@ import {
 import { GrupoFilasCursos } from '../molecules/GrupoFilasCursos';
 
 // define el componente TablaCursosAdmin para mostrar los cursos agrupados
-export const TablaCursosAdmin = ({ cursos = [], alumnos = [] }) => {
+export const TablaCursosAdmin = ({ cursos = [], asignaciones = [] }) => {
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({ // guarda el estado de los bloques desplegables
     basica: true,
     media: true,
@@ -31,7 +31,7 @@ export const TablaCursosAdmin = ({ cursos = [], alumnos = [] }) => {
   const cursosMedia = cursos.filter(c => c.nivel?.toLowerCase().includes('medio')); // filtra cursos medios
   const cursosOtros = cursos.filter(c => !c.nivel?.toLowerCase().includes('básico') && !c.nivel?.toLowerCase().includes('basico') && !c.nivel?.toLowerCase().includes('medio')); // agrupa el resto de cursos
 
-  const countAlumnos = (cursoId) => alumnos.filter(a => a.cursoId === cursoId).length; // cuenta alumnos por curso
+  const countAlumnos = (cursoId) => asignaciones.filter(asig => asig.curso && asig.curso.id === cursoId).length; // cuenta alumnos por curso
 
   return (
     <DetailWrapper component={Paper}>

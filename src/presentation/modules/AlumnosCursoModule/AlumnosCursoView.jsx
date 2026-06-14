@@ -1,92 +1,56 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Button,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  List,
-  ListItemButton,
-  ListItemText,
-  Divider,
-  TextField,
-} from '@mui/material';
-import { ArrowBack, PersonAdd, Delete } from '@mui/icons-material';
-import { alumnoCursoRepository, cursoRepository } from '../../../infrastructure/repositories/HttpCursosRepository';
+import { Box, Typography, Button } from '@mui/material';
+import { ArrowBack, PersonAdd } from '@mui/icons-material';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
+import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
+import { useAlumnosCurso } from '../../../application/use-cases/useAlumnosCurso';
+import { TablaAlumnosCurso } from '../../components/organisms/TablaAlumnosCurso';
+import { ModalMatricularAlumno } from '../../components/organisms/ModalMatricularAlumno';
 import { 
   MainContainer, 
   BackButton, 
   HeaderPaper, 
   HeaderStack, 
-  TitleText, 
-  TablePaper, 
-  StyledTableHead, 
-  WhiteTableCell, 
-  EmptyRowCell 
+  TitleText 
 } from './AlumnosCursoView.styles';
 
+// vista principal para gestionar los alumnos de un curso específico (presenter)
 export const AlumnosCursoView = () => {
-  const { cursoId } = useParams();
+  const { cursoId } = useParams(); // obtiene el id del curso desde la ruta
   const navigate = useNavigate();
 
-  const [curso, setCurso] = useState(null);
-  const [asignaciones, setAsignaciones] = useState([]);
-  const [openSelector, setOpenSelector] = useState(false);
-  const [edadFiltro, setEdadFiltro] = useState('');
+  // hooks y lógica de negocio abstraída
+  const { curso, asignaciones, loading, asignarAlumno, desvincularAlumno } = useAlumnosCurso(cursoId);
   const { alumnos } = useAlumnos();
+  const { asignaciones: asignacionesGlobales, cargarAsignaciones: recargarAsignacionesGlobales } = useAsignacionesAlumnos();
 
-  const cargarDatos = async () => {
-    try {
-      const cursos = await cursoRepository.getAll();
-      const current = cursos.find(c => c.id === parseInt(cursoId));
-      setCurso(current);
+  const [openSelector, setOpenSelector] = useState(false); // estado del modal
 
-      const lista = await alumnoCursoRepository.getByCurso(cursoId);
-      setAsignaciones(Array.isArray(lista) ? lista : []);
-    } catch (err) {
-      console.error("Error al cargar datos del curso:", err);
-    }
-  };
-
-  useEffect(() => {
-    cargarDatos();
-  }, [cursoId]);
-
+  // coordina la asignación y recarga el estado global
   const handleAsignar = async (alumnoId) => {
     try {
-      await alumnoCursoRepository.asignar({
-        alumno: { id: alumnoId },
-        curso: { id: parseInt(cursoId) }
-      });
-      setOpenSelector(false); // Cierre buscador
-      cargarDatos(); // Actualizacion tabla
+      await asignarAlumno(alumnoId);
+      recargarAsignacionesGlobales();
     } catch (err) {
       alert("Error al asignar: " + err.message);
     }
   };
 
+  // coordina la desvinculación y recarga el estado global
   const handleDesvincular = async (id) => {
-    if (window.confirm("¿Deseas quitar al alumno de este curso?")) {
-      await alumnoCursoRepository.desvincular(id);
-      cargarDatos();
-    }
+    await desvincularAlumno(id);
+    recargarAsignacionesGlobales();
   };
-  if (!curso) return <Typography sx={{ p: 4 }}>Cargando información del curso...</Typography>;
+
+  if (loading || !curso) return <Typography sx={{ p: 4 }}>Cargando información del curso...</Typography>;
 
   return (
     <MainContainer>
       <BackButton startIcon={<ArrowBack />} onClick={() => navigate('/cursos')}>
         Volver a Cursos
       </BackButton>
+      
       <HeaderPaper elevation={2}>
         <HeaderStack direction="row">
           <Box>
@@ -98,82 +62,28 @@ export const AlumnosCursoView = () => {
           <Button 
             variant="contained" 
             startIcon={<PersonAdd />} 
-            onClick={() => setOpenSelector(true)}
+            onClick={() => setOpenSelector(true)} // abre el modal
           >
             Matricular Alumno
           </Button>
         </HeaderStack>
       </HeaderPaper>
-      <TablePaper component={Paper}>
-        <Table>
-          <StyledTableHead>
-            <TableRow>
-              <WhiteTableCell>RUT</WhiteTableCell>
-              <WhiteTableCell>Nombre Alumno</WhiteTableCell>
-              <WhiteTableCell>Apoderado</WhiteTableCell>
-              <WhiteTableCell align="right">Acciones</WhiteTableCell>
-            </TableRow>
-          </StyledTableHead>
-          <TableBody>
-            {asignaciones.length === 0 ? (
-              <TableRow>
-                <EmptyRowCell colSpan={4} align="center">
-                  No hay alumnos asignados a este curso todavía.
-                </EmptyRowCell>
-              </TableRow>
-            ) : (
-              asignaciones.map((asig) => (
-                <TableRow key={asig.id}>
-                  <TableCell>{asig.alumno?.rut}</TableCell>
-                  <TableCell>{asig.alumno?.nombre} {asig.alumno?.apellido}</TableCell>
-                  <TableCell>{asig.alumno?.nombreApoderado}</TableCell>
-                  <TableCell align="right">
-                    <IconButton color="error" onClick={() => handleDesvincular(asig.id)}>
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TablePaper>
-      <Dialog open={openSelector} onClose={() => setOpenSelector(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Seleccionar Alumno para Matricular</DialogTitle>
-        <DialogContent dividers>
-          <TextField
-            label="Filtrar por Edad"
-            type="number"
-            fullWidth
-            size="small"
-            value={edadFiltro}
-            onChange={(e) => setEdadFiltro(e.target.value)}
-            sx={{ mb: 2 }}
-            placeholder="Ej: 14"
-          />
-          <List>
-            {alumnos
-              .filter(a => !asignaciones.some(asig => asig.alumno?.id === a.id))
-              .filter(a => edadFiltro === '' || Number(a.edad) === Number(edadFiltro))
-              .map((alumno) => (
-                <Box key={alumno.id}>
-                  <ListItemButton onClick={() => handleAsignar(alumno.id)}>
-                    <ListItemText 
-                      primary={`${alumno.nombre} ${alumno.apellido}`} 
-                      secondary={`RUT: ${alumno.rut} | Edad: ${alumno.edad || 'N/A'}`}
-                    />
-                  </ListItemButton>
-                  <Divider />
-                </Box>
-              ))}
-            {alumnos.filter(a => !asignaciones.some(asig => asig.alumno?.id === a.id)).length === 0 && (
-              <Typography sx={{ p: 2, textAlign: 'center' }} color="textSecondary">
-                No hay más alumnos disponibles para asignar.
-              </Typography>
-            )}
-          </List>
-        </DialogContent>
-      </Dialog>
+
+      {/* organismo para la tabla de registros */}
+      <TablaAlumnosCurso 
+        asignaciones={asignaciones} 
+        onDesvincular={handleDesvincular} 
+      />
+
+      {/* organismo modal aislado */}
+      <ModalMatricularAlumno 
+        open={openSelector} 
+        onClose={() => setOpenSelector(false)} 
+        alumnos={alumnos} 
+        asignacionesGlobales={asignacionesGlobales} 
+        onAsignar={handleAsignar} 
+      />
     </MainContainer>
   );
 };
+
