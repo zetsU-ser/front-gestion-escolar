@@ -2,10 +2,13 @@ import { useState, useContext } from 'react';
 import { AuthContext } from '../../../application/context/AuthContext';
 import { useCargaAcademica } from '../../../application/use-cases/useCargaAcademica';
 import { useCursos } from '../../../application/use-cases/useCursos';
-import { TablaHorario } from '../../components/organisms/TablaHorario';
-import { FiltroSeleccionCurso } from '../../components/organisms/FiltroSeleccionCurso';
-import { DashboardContainer, StyledPaper, Title, DescriptionText } from './ProfesorDashboard.styles';
-import { Typography, CircularProgress, Box } from '@mui/material';
+
+import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { PanelDashboard } from '../../components/organisms/PanelDashboard';
+import { DetalleMetricasProfesor } from '../../components/organisms/DetalleMetricasProfesor';
+import { DashboardContainer, StyledDivider } from './ProfesorDashboard.styles';
+
+import { CircularProgress, Box } from '@mui/material';
 
 const ASIGNATURAS_MOCK = [
   { id: 1, nombre: 'Matemáticas' },
@@ -29,6 +32,7 @@ export const ProfesorDashboard = () => {
 
   const [cursoSeleccionado, setCursoSeleccionado] = useState('');
   const [asignaturaSeleccionada, setAsignaturaSeleccionada] = useState('');
+  const [metricaSeleccionada, setMetricaSeleccionada] = useState('horario'); // por defecto muestra el horario
 
   if (loadingCargas || loadingCursos) {
     return (
@@ -41,7 +45,6 @@ export const ProfesorDashboard = () => {
   }
 
   // Identificar el ID interno del profesor en base de datos.
-  // currentUser.profile.id viene desde la tabla usuarios de mock o bd
   const profesorId = currentUser?.profile?.id;
 
   // Filtrar la carga que pertenece exclusivamente a este docente
@@ -77,38 +80,37 @@ export const ProfesorDashboard = () => {
     };
   };
 
+  const metricas = [
+    { id: 'cursos', valor: misCursos.length, titulo: 'Cursos Asignados' },
+    { id: 'asignaturas', valor: misAsignaturas.length, titulo: 'Asignaturas' },
+    { id: 'horario', valor: miHorario.length, titulo: 'Bloques Horarios' }
+  ];
+
   return (
     <DashboardContainer>
-      <StyledPaper elevation={4}>
-        <Title variant="h3" gutterBottom>
-          Portal Docente
-        </Title>
-        <Typography variant="h6" color="textSecondary" sx={{ mb: 3 }}>
-          Bienvenido, {currentUser?.profile?.nombre || currentUser?.email}
-        </Typography>
+      <HeaderModulo 
+        titulo="Panel de Docentes"
+      />
 
-        <DescriptionText variant="body1">
-          Desde aquí puedes visualizar tu carga académica y seleccionar el curso y asignatura 
-          con la que deseas trabajar.
-        </DescriptionText>
+      <StyledDivider />
 
-        {/* Organismo: FiltroSeleccionCurso */}
-        <FiltroSeleccionCurso
-          cursosOpciones={cursosOpciones}
-          asignaturasOpciones={asignaturasOpciones}
-          cursoSeleccionado={cursoSeleccionado}
-          asignaturaSeleccionada={asignaturaSeleccionada}
-          onCursoChange={(e) => setCursoSeleccionado(e.target.value)}
-          onAsignaturaChange={(e) => setAsignaturaSeleccionada(e.target.value)}
-        />
+      <PanelDashboard 
+        metricas={metricas} 
+        onSelectMetrica={(id) => setMetricaSeleccionada(id === metricaSeleccionada ? null : id)} 
+      />
 
-        {/* Organismo: TablaHorario */}
-        <TablaHorario
-          horarioData={miHorario}
-          getDisplayData={getDisplayData}
-        />
+      <DetalleMetricasProfesor 
+        metricaId={metricaSeleccionada}
+        miHorario={miHorario}
+        getDisplayData={getDisplayData}
+        cursosOpciones={cursosOpciones}
+        asignaturasOpciones={asignaturasOpciones}
+        cursoSeleccionado={cursoSeleccionado}
+        asignaturaSeleccionada={asignaturaSeleccionada}
+        onCursoChange={(e) => setCursoSeleccionado(e.target.value)}
+        onAsignaturaChange={(e) => setAsignaturaSeleccionada(e.target.value)}
+      />
 
-      </StyledPaper>
     </DashboardContainer>
   );
 };

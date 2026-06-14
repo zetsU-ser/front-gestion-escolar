@@ -5,14 +5,19 @@ export const DashboardContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
   minHeight: '80vh',
+  width: '100%',
+  maxWidth: '1200px',
+  margin: '0 auto',
+}));
+
+export const StyledDivider = styled(Divider)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
 }));
 
 export const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(6),
-  borderRadius: theme.shape.borderRadius * 2, // Equivalent to borderRadius: 4
+  borderRadius: theme.shape.borderRadius * 2,
   textAlign: 'center',
   maxWidth: 600,
 }));
@@ -20,10 +25,6 @@ export const StyledPaper = styled(Paper)(({ theme }) => ({
 export const Title = styled(Typography)(({ theme }) => ({
   fontWeight: 'bold',
   color: theme.palette.primary.main,
-}));
-
-export const StyledDivider = styled(Divider)(({ theme }) => ({
-  margin: theme.spacing(3, 0),
 }));
 
 export const DescriptionText = styled(Typography)(({ theme }) => ({
