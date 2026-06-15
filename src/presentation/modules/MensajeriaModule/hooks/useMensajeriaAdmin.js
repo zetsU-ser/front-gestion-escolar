@@ -76,8 +76,10 @@ export const useMensajeriaAdmin = () => {
 
       await enviarMensaje(payload);
       showSnackbar(`¡Éxito! Se enviaron ${correosDestino.length} correo(s) correctamente.`, "success");
+      return true;
     } catch (error) {
       showSnackbar(error.message, "error");
+      return false;
     }
   };
 

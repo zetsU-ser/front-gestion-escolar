@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useSnackbar } from '../../../application/context/SnackbarContext';
+import { TextField, Box } from '@mui/material';
 
 import { Add as AddIcon } from '@mui/icons-material';
 import { useAlumnos } from '../../../application/use-cases/useAlumnos';
@@ -32,6 +33,17 @@ export const AlumnosTable = () => {
     setOpen(false);
     setAlumnoEditar(null); // Reseteo para proxima apertura
   };
+
+  const [filtroEdad, setFiltroEdad] = useState('');
+  const [filtroFecha, setFiltroFecha] = useState('');
+
+  const alumnosFiltrados = useMemo(() => {
+    return alumnos.filter(a => {
+      const cumpleEdad = filtroEdad ? String(a.edad) === String(filtroEdad) : true;
+      const cumpleFecha = filtroFecha ? a.fecha_nacimiento?.includes(filtroFecha) : true;
+      return cumpleEdad && cumpleFecha;
+    });
+  }, [alumnos, filtroEdad, filtroFecha]);
 
   const handleGuardar = async (form) => {
     try {
@@ -69,9 +81,29 @@ export const AlumnosTable = () => {
         </AddButton>
       </ButtonContainer>
 
+      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+        <TextField
+          label="Edad"
+          type="number"
+          variant="outlined"
+          size="small"
+          value={filtroEdad}
+          onChange={(e) => setFiltroEdad(e.target.value)}
+        />
+        <TextField
+          label="Fecha de nacimiento"
+          type="date"
+          variant="outlined"
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          value={filtroFecha}
+          onChange={(e) => setFiltroFecha(e.target.value)}
+        />
+      </Box>
+
       {/* Organismo: Tabla de Alumnos Atomizada */}
       <TablaAlumnosGlobal
-        alumnos={alumnos}
+        alumnos={alumnosFiltrados}
         onEdit={handleOpen}
         onDelete={async (id) => {
           try {

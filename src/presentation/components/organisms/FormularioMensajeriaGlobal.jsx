@@ -109,9 +109,21 @@ export const FormularioMensajeriaGlobal = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(form);
+    const success = await onSubmit(form);
+    if (success) {
+      setForm({
+        alcance: alcancesOpciones[0]?.value || 'INSTITUCION',
+        cursoId: '',
+        alumnoId: '',
+        asunto: '',
+        cuerpo: ''
+      });
+      setFiltroTipo('');
+      setFiltroGrado('');
+      setFiltroLetra('');
+    }
   };
 
   const renderCascadaCursos = () => (

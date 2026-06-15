@@ -30,8 +30,8 @@ export const FormularioAsignacionHorario = ({
   const [form, setForm] = useState({
     docenteId: '',
     asignaturaId: '',
-    diaSemana: 'LUNES',
-    bloqueHorario: 1
+    diaSemana: '',
+    bloqueHorario: ''
   });
 
   const handleChange = (e) => {
