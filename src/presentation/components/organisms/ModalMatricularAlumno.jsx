@@ -7,7 +7,6 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
-  TextField,
   Typography,
   Box,
   Checkbox,
@@ -18,12 +17,10 @@ import {
 
 // define el organismo modal para matricular alumnos que no estén en ningún curso
 export const ModalMatricularAlumno = ({ open, onClose, alumnos = [], asignacionesGlobales = [], onAsignar }) => {
-  const [edadFiltro, setEdadFiltro] = useState(''); // estado para filtrar la lista por edad
   const [seleccionados, setSeleccionados] = useState([]); // estado para multi-select
 
-  // limpia el filtro y cierra
+  // limpia la seleccion y cierra
   const handleClose = () => {
-    setEdadFiltro('');
     setSeleccionados([]);
     onClose();
   };
@@ -44,23 +41,24 @@ export const ModalMatricularAlumno = ({ open, onClose, alumnos = [], asignacione
 
   // filtra los alumnos disponibles
   const alumnosDisponibles = alumnos
-    .filter(a => !asignacionesGlobales.some(asig => asig.alumno?.id === a.id)) // excluye alumnos ya asignados a nivel colegio
-    .filter(a => edadFiltro === '' || Number(a.edad) === Number(edadFiltro)); // filtra por edad si se especificó
+    .filter(a => !asignacionesGlobales.some(asig => asig.alumno?.id === a.id)); // excluye alumnos ya asignados a nivel colegio
+
+  const calcularEdad = (fechaNacimiento) => {
+    if (!fechaNacimiento) return 'N/A';
+    const hoy = new Date();
+    const cumpleanos = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+    const m = hoy.getMonth() - cumpleanos.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+      edad--;
+    }
+    return isNaN(edad) ? 'N/A' : edad;
+  };
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle>Seleccionar Alumno para Matricular</DialogTitle>
       <DialogContent dividers>
-        <TextField
-          label="Filtrar por Edad"
-          type="number"
-          fullWidth
-          size="small"
-          value={edadFiltro}
-          onChange={(e) => setEdadFiltro(e.target.value)} // actualiza el estado del filtro de edad
-          sx={{ mb: 2 }}
-          placeholder="Ej: 14"
-        />
         <List>
           {alumnosDisponibles.map((alumno) => {
             const isSelected = seleccionados.includes(alumno.id);
@@ -77,7 +75,7 @@ export const ModalMatricularAlumno = ({ open, onClose, alumnos = [], asignacione
                   </ListItemIcon>
                   <ListItemText 
                     primary={`${alumno.nombre} ${alumno.apellido}`} 
-                    secondary={`RUT: ${alumno.rut} | Edad: ${alumno.edad || 'N/A'}`}
+                    secondary={`RUT: ${alumno.rut} | Edad: ${alumno.edad || calcularEdad(alumno.fecha_nacimiento)}`}
                   />
                 </ListItemButton>
                 <Divider />
