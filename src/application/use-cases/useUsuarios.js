@@ -57,6 +57,9 @@ export const useUsuarios = (filtroTipo = null) => {
       await cargarUsuarios();
     } catch (err) {
       console.error("Error crítico en creación de usuario:", err);
+      if (err.response && err.response.status === 500) {
+        throw new Error("El usuario ya existe o los datos están duplicados (ya registrado).");
+      }
       throw err;
     }
   };
