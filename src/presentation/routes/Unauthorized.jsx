@@ -11,7 +11,7 @@ export const Unauthorized = () => {
 
   return (
     <UnauthorizedContainer>
-      <ErrorText variant="h3">No autorizado</ErrorText>
+      <ErrorText variant="h3">Acceso Denegado</ErrorText>
       <MessageText variant="body1">No tienes los permisos necesarios para ver esta página.</MessageText>
       <HomeButton variant="contained" onClick={() => navigate('/')}>Volver al Inicio</HomeButton>
     </UnauthorizedContainer>

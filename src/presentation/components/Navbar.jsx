@@ -92,9 +92,6 @@ export const Navbar = ({ children }) => {
               {renderMenuItem('Personal', '/admin/personal', <GroupIcon />)}
               {renderMenuItem('Matricular Alumno', '/admin/alumnos', <SchoolIcon />)}
               {renderMenuItem('Mensajería', '/admin/mensajeria', <EmailIcon />)}
-              {renderMenuItem('Calificaciones', '/profesor/evaluaciones', <AssignmentIcon />)}
-              {renderMenuItem('Asistencia', '/profesor/asistencia', <AssignmentIcon />)}
-              {renderMenuItem('Carga Académica', '/coordinador/carga-academica', <AssignmentIcon />)}
             </>
           )}
 

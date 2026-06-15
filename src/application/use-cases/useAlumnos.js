@@ -27,18 +27,13 @@ export const useAlumnos = () => {
   }, []);
 
   const crear = async (alumno) => {
-    const { edad, ...datosBackend } = alumno;
-    await alumnoRepository.create(datosBackend);
+    await alumnoRepository.create(alumno);
     await cargarAlumnos(); // Actualizacion reactiva
   };
 
   const actualizar = async (id, alumno) => {
-    const { edad, ...datosBackend } = alumno;
-    await alumnoRepository.update(id, datosBackend);
+    await alumnoRepository.update(id, alumno);
     await cargarAlumnos();
-    // Parche frontend: Asegurar que 'edad' persista visualmente en la sesión actual
-    // para cumplir con los tests E2E, ya que el backend no la almacena por defecto.
-    setAlumnos(prev => prev.map(a => a.id === id ? { ...a, edad: alumno.edad } : a));
   };
 
   const eliminar = async (id) => {

@@ -49,25 +49,19 @@ export const useUsuarios = (filtroTipo = null) => {
       const datosParaBackend = {
         ...datosBase,
         tipoUsuario: usuario.rol, 
-        rol: usuario.rol,
-        asignatura_id: datosBase.asignatura_id || null
+        rol: usuario.rol
       };
       
       await usuarioRepository.create(datosParaBackend);
       await cargarUsuarios();
     } catch (err) {
       console.error("Error crítico en creación de usuario:", err);
-      if (err.response && err.response.status === 500) {
-        throw new Error("El usuario ya existe o los datos están duplicados (ya registrado).");
-      }
       throw err;
     }
   };
 
   const actualizar = async (id, usuario) => {
-    const { password, ...datosBackend } = usuario;
-    datosBackend.asignatura_id = datosBackend.asignatura_id || null;
-    await usuarioRepository.update(id, datosBackend);
+    await usuarioRepository.update(id, usuario);
     await cargarUsuarios();
   };
 

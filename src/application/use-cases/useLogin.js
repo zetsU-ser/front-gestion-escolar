@@ -10,7 +10,6 @@ export const useLogin = () => {
     setError(null);
 
     try {
-      await authRepository.logout();
       const user = await authRepository.login(email, password);
       return user;
     } catch (err) {
