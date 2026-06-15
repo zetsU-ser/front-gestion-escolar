@@ -93,7 +93,7 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="/coordinador/carga-academica" element={
-                <ProtectedRoute allowedRoles={['COORDINADOR', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['COORDINADOR']}>
                   <CargaAcademicaView />
                 </ProtectedRoute>
               } />
@@ -109,22 +109,22 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="/profesor/asistencia" element={
-                <ProtectedRoute allowedRoles={['DOCENTE', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <AsistenciaView />
                 </ProtectedRoute>
               } />
               <Route path="/profesor/asistencia/:cursoId" element={
-                <ProtectedRoute allowedRoles={['DOCENTE', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <AsistenciaView />
                 </ProtectedRoute>
               } />
               <Route path="/profesor/evaluaciones" element={
-                <ProtectedRoute allowedRoles={['DOCENTE', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <EvaluacionesView />
                 </ProtectedRoute>
               } />
               <Route path="/profesor/evaluaciones/:cursoId" element={
-                <ProtectedRoute allowedRoles={['DOCENTE', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['DOCENTE']}>
                   <EvaluacionesView />
                 </ProtectedRoute>
               } />
