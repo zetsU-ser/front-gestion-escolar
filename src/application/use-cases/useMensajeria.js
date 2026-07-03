@@ -9,40 +9,41 @@ export const useMensajeria = () => {
     mutationFn: async (payload) => {
       const { destinatarios, asunto, cuerpo_mensaje } = payload;
       
-      // Enviamos el correo en lotes (batches) de 15 en paralelo para mejorar el rendimiento
-      let enviosExitosos = 0;
-      let enviosFallidos = 0;
-      const batchSize = 15;
+      // Ejecutamos el envío en segundo plano sin bloquear el retorno de la mutación
+      // Esto libera la interfaz de usuario de inmediato
+      (async () => {
+        const batchSize = 15;
+        let enviosExitosos = 0;
+        let enviosFallidos = 0;
 
-      for (let i = 0; i < destinatarios.length; i += batchSize) {
-        const batch = destinatarios.slice(i, i + batchSize);
-        await Promise.all(
-          batch.map(async (dest) => {
-            try {
-              await mensajeRepository.enviar({
-                alumnoId: Number(dest.alumnoId),
-                profesorId: 1, // Podría venir de AuthContext en el futuro
-                destinatario: String(dest.correo),
-                asunto: String(asunto),
-                mensaje: String(cuerpo_mensaje),
-                tipo: 'COMUNICACION'
-              });
-              enviosExitosos++;
-            } catch (err) {
-              console.error(`Error al enviar a ${dest.correo}:`, err);
-              enviosFallidos++;
-            }
-          })
-        );
-      }
-      
-      if (enviosExitosos === 0 && enviosFallidos > 0) {
-        throw new Error("El servidor de correo rechazó todos los mensajes. Verifique las direcciones de destino.");
-      }
+        for (let i = 0; i < destinatarios.length; i += batchSize) {
+          const batch = destinatarios.slice(i, i + batchSize);
+          await Promise.all(
+            batch.map(async (dest) => {
+              try {
+                await mensajeRepository.enviar({
+                  alumnoId: Number(dest.alumnoId),
+                  profesorId: 1, // Podría venir de AuthContext en el futuro
+                  destinatario: String(dest.correo),
+                  asunto: String(asunto),
+                  mensaje: String(cuerpo_mensaje),
+                  tipo: 'COMUNICACION'
+                });
+                enviosExitosos++;
+              } catch (err) {
+                console.error(`Error al enviar a ${dest.correo}:`, err);
+                enviosFallidos++;
+              }
+            })
+          );
+        }
+        console.log(`[Envío en Segundo Plano] Finalizado. Exitosos: ${enviosExitosos}, Fallidos: ${enviosFallidos}`);
+      })();
 
+      // Retornamos de inmediato para que la UI se desbloquee
       return { 
         success: true, 
-        message: `Se enviaron ${enviosExitosos} mensajes correctamente. Fallaron ${enviosFallidos}.` 
+        message: `Se inició el envío de ${destinatarios.length} mensajes en segundo plano.` 
       };
     }
   });
