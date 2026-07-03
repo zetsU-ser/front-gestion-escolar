@@ -9,25 +9,31 @@ export const useMensajeria = () => {
     mutationFn: async (payload) => {
       const { destinatarios, asunto, cuerpo_mensaje } = payload;
       
-      // Enviamos el correo individualmente a la cola de ms-asistencia
+      // Enviamos el correo en lotes (batches) de 15 en paralelo para mejorar el rendimiento
       let enviosExitosos = 0;
       let enviosFallidos = 0;
+      const batchSize = 15;
 
-      for (const dest of destinatarios) {
-        try {
-          await mensajeRepository.enviar({
-            alumnoId: Number(dest.alumnoId),
-            profesorId: 1, // Podría venir de AuthContext en el futuro
-            destinatario: String(dest.correo),
-            asunto: String(asunto),
-            mensaje: String(cuerpo_mensaje),
-            tipo: 'COMUNICACION'
-          });
-          enviosExitosos++;
-        } catch (err) {
-          console.error(`Error al enviar a ${dest.correo}:`, err);
-          enviosFallidos++;
-        }
+      for (let i = 0; i < destinatarios.length; i += batchSize) {
+        const batch = destinatarios.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (dest) => {
+            try {
+              await mensajeRepository.enviar({
+                alumnoId: Number(dest.alumnoId),
+                profesorId: 1, // Podría venir de AuthContext en el futuro
+                destinatario: String(dest.correo),
+                asunto: String(asunto),
+                mensaje: String(cuerpo_mensaje),
+                tipo: 'COMUNICACION'
+              });
+              enviosExitosos++;
+            } catch (err) {
+              console.error(`Error al enviar a ${dest.correo}:`, err);
+              enviosFallidos++;
+            }
+          })
+        );
       }
       
       if (enviosExitosos === 0 && enviosFallidos > 0) {
