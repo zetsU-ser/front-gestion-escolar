@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Button, Paper, Typography, Stack, TableContainer, TableHead, TableCell } from '@mui/material';
+import { Box, Button, Paper, Typography, Stack, TableContainer, TableHead, TableCell, Divider, Table, TableRow, TableBody } from '@mui/material';
 
 export const MainContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -40,4 +40,22 @@ export const WhiteTableCell = styled(TableCell)(({ theme }) => ({
 export const EmptyRowCell = styled(TableCell)(({ theme }) => ({
   paddingTop: theme.spacing(4),
   paddingBottom: theme.spacing(4),
+}));
+
+export const LoadingText = styled(Typography)(({ theme }) => ({
+  padding: theme.spacing(4),
+}));
+
+export const SubtitleText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+export const EnrollButton = styled(Button)(({ theme }) => ({
+}));
+
+export const TitleBox = styled(Box)(({ theme }) => ({
+}));
+
+export const StyledDivider = styled(Divider)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
 }));

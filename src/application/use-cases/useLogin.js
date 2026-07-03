@@ -1,38 +1,44 @@
-import { useState } from 'react';
-import { authRepository } from '../../infrastructure/repositories/HttpAuthRepository';
+import { useMutation } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
+// CUSTOM HOOK
+// maneja la lógica de login
 export const useLogin = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { authRepository } = useDependencies();
+  const loginMutation = useMutation({
+    mutationFn: ({ email, password }) => authRepository.login(email, password),
+  });
 
+  // ejecuta la acción asíncrona de login
   const login = async (email, password) => {
-    setLoading(true);
-    setError(null);
-
     try {
-      const user = await authRepository.login(email, password);
+      const user = await loginMutation.mutateAsync({ email, password });
       return user;
     } catch (err) {
       // Normalizamos error para la UI
-      setError(err.message || 'Credenciales inválidas o fallo de conexión.');
-      throw err;
-    } finally {
-      setLoading(false);
+      throw new Error(err.message || 'Credenciales inválidas o fallo de conexión.');
     }
   };
 
+  const logoutMutation = useMutation({
+    mutationFn: () => authRepository.logout(),
+  });
+
+  // ejecuta la acción asíncrona de logout
   const logout = async () => {
     try {
-      await authRepository.logout();
+      await logoutMutation.mutateAsync();
     } catch (err) {
       console.error('Fallo al cerrar sesión:', err);
     }
   };
 
+  const error = loginMutation.error ? (loginMutation.error.message || 'Credenciales inválidas o fallo de conexión.') : null;
+
   return {
     login,
     logout,
-    loading,
+    loading: loginMutation.isPending || loginMutation.isLoading,
     error
   };
 };

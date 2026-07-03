@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+// CUSTOM HOOK
+// maneja la lógica de formerrors
 export const useFormErrors = () => {
   const [errors, setErrors] = useState({});
 

@@ -2,6 +2,8 @@ import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../application/context/AuthContext';
 
+// COMPONENT PATTERN
+// renderiza la vista de protectedroute
 export const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser, loading } = useContext(AuthContext);
 

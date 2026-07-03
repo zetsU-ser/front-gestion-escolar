@@ -1,3 +1,5 @@
+// REPOSITORY PATTERN
+// define las operaciones para usuario
 export class UsuarioRepository {
   async getAll() { throw new Error('Not implemented'); }
   async create(usuario) { throw new Error('Not implemented'); }

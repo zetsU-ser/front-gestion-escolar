@@ -1,6 +1,8 @@
 import { useFormState } from './useFormState';
 import { useFormErrors } from './useFormErrors';
 
+// CUSTOM HOOK
+// maneja la lógica de form
 export const useForm = (initialState, validateFn) => {
   const { form, setForm, handleChange: handleStateChange, resetForm } = useFormState(initialState);
   const { errors, setErrors, clearError, clearAllErrors } = useFormErrors();

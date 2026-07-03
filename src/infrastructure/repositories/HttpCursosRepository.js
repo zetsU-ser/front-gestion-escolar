@@ -1,23 +1,53 @@
 import axiosClient from '../api/axiosClient';
+import { CursoRepository } from '../../domain/repositories/CursoRepository';
+import { AlumnoCursoRepository } from '../../domain/repositories/AlumnoCursoRepository';
+import { Curso } from '../../domain/models/Curso';
 
-export const cursoRepository = {
-  getAll: async () => {
-    const response = await axiosClient.get('/cursos');
-    return response.data;
-  },
+// REPOSITORY PATTERN
+// gestiona las operaciones de datos para curso
+class HttpCursoRepository extends CursoRepository {
+  async getAll() {
+    try {
+      const response = await axiosClient.get('/cursos');
+      // Soporta arreglos directos o respuestas envueltas como { data: [...] } o { cursos: [...] }
+      const dataList = Array.isArray(response.data) ? response.data : (response.data.data || response.data.cursos || []);
+      return dataList.map(data => new Curso(data));
+    } catch (err) {
+      throw new Error('No se pudo obtener la lista de cursos.');
+    }
+  }
 
-  create: async (curso) => {
-    const response = await axiosClient.post('/cursos', curso);
-    return response.data;
-  },
+  async create(cursoData) {
+    try {
+      const response = await axiosClient.post('/cursos', cursoData);
+      return new Curso(response.data);
+    } catch (err) {
+      throw new Error('No se pudo crear el curso.');
+    }
+  }
 
-  delete: async (id) => {
-    await axiosClient.delete(`/cursos/${id}`);
-  },
-};
+  async delete(id) {
+    try {
+      await axiosClient.delete(`/cursos/${id}`);
+    } catch (err) {
+      throw new Error('No se pudo eliminar el curso.');
+    }
+  }
+}
 
-export const alumnoCursoRepository = {
-  getByCurso: async (cursoId) => {
+// REPOSITORY PATTERN
+// gestiona las operaciones de datos para alumnocurso
+class HttpAlumnoCursoRepository extends AlumnoCursoRepository {
+  async getAll() {
+    try {
+      const response = await axiosClient.get('/alumnosCurso');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getByCurso(cursoId) {
     try {
       const response = await axiosClient.get('/alumnosCurso');
       const todas = response.data;
@@ -28,14 +58,27 @@ export const alumnoCursoRepository = {
     } catch (error) {
       return [];
     }
-  },
-
-  asignar: async (asignacion) => {
-    const response = await axiosClient.post('/alumnosCurso', asignacion);
-    return response.data;
-  },
-
-  desvincular: async (id) => {
-    await axiosClient.delete(`/alumnosCurso/${id}`);
   }
-};
+
+  async asignar(asignacion) {
+    try {
+      const response = await axiosClient.post('/alumnosCurso', asignacion);
+      return response.data;
+    } catch (err) {
+      throw new Error('No se pudo asignar el alumno al curso.');
+    }
+  }
+
+  async desvincular(id) {
+    try {
+      await axiosClient.delete(`/alumnosCurso/${id}`);
+    } catch (err) {
+      throw new Error('No se pudo desvincular el alumno del curso.');
+    }
+  }
+}
+
+// SINGLETON
+export const cursoRepository = new HttpCursoRepository();
+// SINGLETON
+export const alumnoCursoRepository = new HttpAlumnoCursoRepository();

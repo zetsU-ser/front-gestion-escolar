@@ -6,6 +6,8 @@ import {
   HomeButton 
 } from './Unauthorized.styles';
 
+// COMPONENT PATTERN
+// renderiza la vista de unauthorized
 export const Unauthorized = () => {
   const navigate = useNavigate();
 

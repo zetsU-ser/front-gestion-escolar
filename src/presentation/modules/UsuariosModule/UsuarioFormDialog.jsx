@@ -1,18 +1,17 @@
 import { useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  TextField,
-  Button,
-  MenuItem,
-} from '@mui/material';
+
 import { useForm } from '../../../application/hooks/useForm';
 import { validateSchema } from '../../../application/utils/validateSchema';
 import { getUsuarioValidationSchema } from './usuarioValidationSchema';
 import {
   StyledDialogTitle,
   StyledDialogActions,
-  SaveButton
+  SaveButton,
+  StyledDialog,
+  StyledDialogContent,
+  StyledTextField,
+  StyledMenuItem,
+  StyledButton
 } from './UsuarioFormDialog.styles';
 
 const TIPOS_USUARIO = ['DOCENTE', 'COORDINADOR'];
@@ -23,9 +22,12 @@ const estadoInicial = {
   email: '',
   rut: '',
   rol: 'DOCENTE',
-  password: ''
+  password: '',
+  asignatura_id: ''
 };
 
+// VIEW PATTERN
+// renderiza la vista de usuarioformdialog
 export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) => {
 
   const {
@@ -58,14 +60,14 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <StyledDialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <StyledDialogTitle>
         {usuarioEditar ? 'Editar Usuario' : 'Agregar Nuevo Usuario'}
       </StyledDialogTitle>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogContent>
-          <TextField
+        <StyledDialogContent>
+          <StyledTextField
             margin="normal"
             required
             fullWidth
@@ -76,7 +78,7 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
             error={!!errors.nombre}
             helperText={errors.nombre}
           />
-          <TextField
+          <StyledTextField
             margin="normal"
             required
             fullWidth
@@ -87,7 +89,7 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
             error={!!errors.apellido}
             helperText={errors.apellido}
           />
-          <TextField
+          <StyledTextField
             margin="normal"
             required
             fullWidth
@@ -100,7 +102,7 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
             error={!!errors.email}
             helperText={errors.email}
           />
-          <TextField
+          <StyledTextField
             margin="normal"
             required={!usuarioEditar}
             fullWidth
@@ -115,7 +117,7 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
             error={!!errors.password}
             helperText={errors.password || (usuarioEditar ? "Dejar en blanco para mantener la actual" : "Mínimo 6 caracteres")}
           />
-          <TextField
+          <StyledTextField
             margin="normal"
             required
             fullWidth
@@ -127,31 +129,52 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
             helperText={errors.rut}
           />
 
-          <TextField
+          <StyledTextField
             margin="normal"
             required
             fullWidth
             select
             label="Rol / Tipo de Usuario"
             name="rol"
-            value={form.rol}
+            value={form.rol || ''}
             onChange={handleChange}
           >
             {TIPOS_USUARIO.map((tipo) => (
-              <MenuItem key={tipo} value={tipo}>
+              <StyledMenuItem key={tipo} value={tipo}>
                 {tipo.charAt(0) + tipo.slice(1).toLowerCase()}
-              </MenuItem>
+              </StyledMenuItem>
             ))}
-          </TextField>
-        </DialogContent>
+          </StyledTextField>
+
+          {form.rol === 'DOCENTE' && (
+            <StyledTextField
+              margin="normal"
+              required
+              fullWidth
+              select
+              label="Asignatura Base"
+              name="asignatura_id"
+              value={form.asignatura_id || ''}
+              onChange={handleChange}
+              error={!!errors.asignatura_id}
+              helperText={errors.asignatura_id}
+            >
+              <StyledMenuItem value={1}>Matemáticas</StyledMenuItem>
+              <StyledMenuItem value={2}>Lenguaje y Comunicación</StyledMenuItem>
+              <StyledMenuItem value={3}>Historia y Geografía</StyledMenuItem>
+              <StyledMenuItem value={4}>Ciencias Naturales</StyledMenuItem>
+              <StyledMenuItem value={5}>Inglés</StyledMenuItem>
+            </StyledTextField>
+          )}
+        </StyledDialogContent>
 
         <StyledDialogActions>
-          <Button onClick={handleClose} color="inherit">Cancelar</Button>
+          <StyledButton onClick={handleClose} color="inherit">Cancelar</StyledButton>
           <SaveButton variant="contained" type="submit">
             {usuarioEditar ? 'Actualizar' : 'Crear Usuario'}
           </SaveButton>
         </StyledDialogActions>
       </form>
-    </Dialog>
+    </StyledDialog>
   );
 };

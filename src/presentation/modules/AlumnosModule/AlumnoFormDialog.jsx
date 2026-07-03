@@ -1,15 +1,13 @@
 import { useEffect } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  Button,
-  TextField,
-  Stack,
-} from '@mui/material';
-import {
   StyledDialogTitle,
   StyledDialogActions,
-  SaveButton
+  SaveButton,
+  StyledDialog,
+  StyledDialogContent,
+  StyledButton,
+  StyledTextField,
+  StyledStack
 } from './AlumnoFormDialog.styles';
 import { useForm } from '../../../application/hooks/useForm';
 import { validateSchema } from '../../../application/utils/validateSchema';
@@ -19,11 +17,14 @@ const estadoInicial = {
   nombre: '',
   apellido: '',
   rut: '',
+  edad: '',
   nombreApoderado: '',
   emailApoderado: '',
   telefonoApoderado: ''
 };
 
+// VIEW PATTERN
+// renderiza la vista de alumnoformdialog
 export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => {
 
   const {
@@ -36,24 +37,25 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
 
   useEffect(() => {
     if (alumnoEditar) {
-      reset(alumnoEditar);
+      // Merge con estadoInicial para evitar campos undefined en registros legacy
+      reset({ ...estadoInicial, ...alumnoEditar });
     } else {
       reset(estadoInicial);
     }
   }, [alumnoEditar, open]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <StyledDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <StyledDialogTitle>
         {alumnoEditar ? 'Actualizar Ficha de Alumno' : 'Registrar Nuevo Alumno'}
       </StyledDialogTitle>
 
       <form onSubmit={handleSubmit(onGuardar)}>
-        <DialogContent dividers>
-          <Stack spacing={2}>
+        <StyledDialogContent dividers>
+          <StyledStack spacing={2}>
             {/* DATOS DEL ESTUDIANTE */}
-            <Stack direction="row" spacing={2}>
-              <TextField
+            <StyledStack direction="row" spacing={2}>
+              <StyledTextField
                 label="Nombre"
                 name="nombre"
                 fullWidth
@@ -63,7 +65,7 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
                 error={!!errors.nombre}
                 helperText={errors.nombre}
               />
-              <TextField
+              <StyledTextField
                 label="Apellido"
                 name="apellido"
                 fullWidth
@@ -73,21 +75,37 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
                 error={!!errors.apellido}
                 helperText={errors.apellido}
               />
-            </Stack>
-            <TextField
-              label="RUT del Estudiante"
-              name="rut"
-              placeholder="12345678-9"
-              fullWidth
-              required
-              value={form.rut}
-              onChange={handleChange}
-              error={!!errors.rut}
-              helperText={errors.rut}
-            />
+            </StyledStack>
+            <StyledStack direction="row" spacing={2}>
+              <StyledTextField
+                label="RUT del Estudiante"
+                name="rut"
+                placeholder="12345678-9"
+                fullWidth
+                required
+                value={form.rut}
+                onChange={handleChange}
+                error={!!errors.rut}
+                helperText={errors.rut}
+              />
+              <StyledTextField
+                label="Edad"
+                name="edad"
+                type="number"
+                fullWidth
+                required
+                value={form.edad}
+                onChange={handleChange}
+                error={!!errors.edad}
+                helperText={errors.edad}
+                slotProps={{
+                  htmlInput: { min: 4, max: 20 }
+                }}
+              />
+            </StyledStack>
 
             {/* DATOS DEL APODERADO (Requerido para contacto legal) */}
-            <TextField
+            <StyledTextField
               label="Nombre Completo del Apoderado"
               name="nombreApoderado"
               fullWidth
@@ -97,7 +115,7 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
               error={!!errors.nombreApoderado}
               helperText={errors.nombreApoderado}
             />
-            <TextField
+            <StyledTextField
               label="Email de Contacto"
               name="emailApoderado"
               type="email"
@@ -108,7 +126,7 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
               error={!!errors.emailApoderado}
               helperText={errors.emailApoderado}
             />
-            <TextField
+            <StyledTextField
               label="Teléfono Móvil"
               name="telefonoApoderado"
               fullWidth
@@ -121,11 +139,11 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
               error={!!errors.telefonoApoderado}
               helperText={errors.telefonoApoderado || "Formato: 9XXXXXXXX"}
             />
-          </Stack>
-        </DialogContent>
+          </StyledStack>
+        </StyledDialogContent>
 
         <StyledDialogActions>
-          <Button onClick={onClose} color="inherit">Cancelar</Button>
+          <StyledButton onClick={onClose} color="inherit">Cancelar</StyledButton>
           <SaveButton
             type="submit"
             variant="contained"
@@ -134,6 +152,6 @@ export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => 
           </SaveButton>
         </StyledDialogActions>
       </form>
-    </Dialog>
+    </StyledDialog>
   );
 };

@@ -1,38 +1,43 @@
-import { useState, useEffect } from 'react';
-import { cursoRepository } from '../../infrastructure/repositories/HttpCursosRepository';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
+// CUSTOM HOOK
+// maneja la lógica de cursos
 export const useCursos = () => {
-  const [cursos, setCursos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { cursoRepository } = useDependencies();
 
-  const cargarCursos = async () => {
-    setLoading(true);
-    try {
+  // maneja la carga asíncrona de la lista de cursos
+  const { 
+    data: cursos = [], 
+    isLoading: loading, 
+    refetch: cargarCursos 
+  } = useQuery({
+    queryKey: ['cursos'],
+    queryFn: async () => {
       const data = await cursoRepository.getAll();
-      // Aseguramos formato array para renderizado
-      setCursos(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error cargando cursos:", error);
-      setCursos([]);
-    } finally {
-      setLoading(false);
+      return Array.isArray(data) ? data : [];
     }
-  };
+  });
 
-  useEffect(() => {
-    cargarCursos();
-  }, []);
+  const createMutation = useMutation({
+    mutationFn: (curso) => cursoRepository.create(curso),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cursos'] })
+  });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => cursoRepository.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cursos'] })
+  });
+
+  // crea un nuevo curso y actualiza el estado local
   const crear = async (curso) => {
-    await cursoRepository.create(curso);
-    await cargarCursos(); // Sincronizacion post-creacion
+    await createMutation.mutateAsync(curso);
   };
 
+  // elimina un curso previa confirmación del usuario
   const eliminar = async (id) => {
-    if (window.confirm("¿Seguro que deseas eliminar este curso?")) {
-      await cursoRepository.delete(id);
-      await cargarCursos(); // Sincronizacion post-eliminacion
-    }
+    await deleteMutation.mutateAsync(id);
   };
 
   return { cursos, loading, crear, eliminar, cargarCursos };

@@ -1,55 +1,34 @@
-import { Typography } from '@mui/material';
-import GroupIcon from '@mui/icons-material/Group';
-import { useContext } from 'react';
-import { AuthContext } from '../../../application/context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { 
-  DashboardContainer, 
-  WelcomePaper, 
-  Title, 
-  EmailText, 
-  StyledDivider, 
-  DescriptionText, 
-  ActionStack, 
-  ManagementButton 
-} from './AdminDashboard.styles';
+import { HeaderModulo } from '../../components/HeaderModulo';
+import { MetricPanel } from '../../shared/components/MetricPanel';
+import { TablasDetalleAdmin } from './components/TablasDetalleAdmin';
+import { useAdminDashboardViewModel } from './hooks/useAdminDashboardViewModel';
+import { DashboardContainer, StyledDivider } from './AdminDashboard.styles';
 
+// VIEW PATTERN
+// renderiza la vista de admindashboard
 export const AdminDashboard = () => {
-  // Obtenemos la información de sesión para personalizar el saludo
-  const { currentUser } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const {
+    currentUser, metricas, metricaSeleccionada, setMetricaSeleccionada, personalFiltrado,
+    countAlumnosCurso, cursosBasica, cursosMedia, cursosOtros,
+    alumnosBasica, alumnosMedia, alumnosOtros
+  } = useAdminDashboardViewModel();
 
   return (
     <DashboardContainer>
-      {/* TARJETA DE BIENVENIDA CON EFECTO VIDRIO */}
-      <WelcomePaper elevation={6}>
-        <Title variant="h3" gutterBottom>
-          Panel de Administración
-        </Title>
-        
-        <EmailText variant="h5" color="textSecondary">
-          {currentUser?.email}
-        </EmailText>
-        
-        <StyledDivider />
-        
-        <DescriptionText variant="body1">
-          Bienvenido al centro de control del establecimiento. 
-          Como administrador, tienes permisos para gestionar las cuentas del personal docente 
-          y de coordinación, garantizando la integridad de los accesos al sistema.
-        </DescriptionText>
-        
-        <ActionStack direction="row" spacing={3}>
-          <ManagementButton 
-            variant="contained" 
-            size="large"
-            startIcon={<GroupIcon />}
-            onClick={() => navigate('/usuarios')}
-          >
-            Gestionar Usuarios y Roles
-          </ManagementButton>
-        </ActionStack>
-      </WelcomePaper>
+      <HeaderModulo titulo="Panel de Administración" correo={currentUser?.email} />
+      <StyledDivider />
+      
+      <MetricPanel 
+        metricas={metricas} metricaSeleccionada={metricaSeleccionada}
+        onSelectMetrica={(id) => setMetricaSeleccionada(id === metricaSeleccionada ? null : id)}
+      />
+      
+      <TablasDetalleAdmin 
+        metrica={metricaSeleccionada}
+        personalFiltrado={personalFiltrado}
+        cursosProps={{ cursosBasica, cursosMedia, cursosOtros, countAlumnosCurso }}
+        alumnosProps={{ alumnosBasica, alumnosMedia, alumnosOtros }}
+      />
     </DashboardContainer>
   );
 };
