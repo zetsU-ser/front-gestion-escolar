@@ -1,63 +1,36 @@
-import { useContext, useState } from 'react';
+import { HeaderModulo } from '../../components/HeaderModulo';
+import { MetricPanel } from '../../shared/components/MetricPanel';
+import { TablasDetalleCoordinador } from './components/TablasDetalleCoordinador';
+import { useCoordinadorDashboardViewModel } from './hooks/useCoordinadorDashboardViewModel';
+import { DashboardContainer, StyledDivider } from './CoordinadorDashboard.styles';
 
-
-// importa hooks globales y lógica de negocio
-import { AuthContext } from '../../../application/context/AuthContext';
-import { useAlumnos } from '../../../application/use-cases/useAlumnos';
-import { useCursos } from '../../../application/use-cases/useCursos';
-import { useUsuarios } from '../../../application/use-cases/useUsuarios';
-import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
-
-// importa componentes atómicos y moléculas
-import { PanelDashboard } from '../../components/organisms/PanelDashboard';
-import { HeaderModulo } from '../../components/molecules/HeaderModulo';
-import { DetalleMetricasCoordinador } from '../../components/organisms/DetalleMetricasCoordinador';
-import {
-  DashboardContainer,
-  StyledDivider
-} from './CoordinadorDashboard.styles';
-
-// define la vista principal del dashboard del coordinador
+// VIEW PATTERN
+// renderiza la vista de coordinadordashboard
 export const CoordinadorDashboard = () => {
-  const { currentUser } = useContext(AuthContext); // obtiene la información del usuario autenticado
-
-  // carga toda la data global necesaria para las métricas
-  const { alumnos } = useAlumnos();
-  const { cursos } = useCursos();
-  const { usuarios: docentes } = useUsuarios('DOCENTE');
-  const { asignaciones } = useAsignacionesAlumnos();
-
-  const [metricaSeleccionada, setMetricaSeleccionada] = useState(null); // estado de la métrica clickeada
-
-  // define la estructura de las tarjetas del panel
-  const metricas = [
-    { id: 'cursos', valor: cursos.length, titulo: 'Cursos Registrados' },
-    { id: 'alumnos', valor: alumnos.length, titulo: 'Alumnos Matriculados' },
-    { id: 'docentes', valor: docentes.length, titulo: 'Docentes Activos' }
-  ];
+  const {
+    currentUser, metricas, metricaSeleccionada, setMetricaSeleccionada,
+    docentes, cursosBasica, cursosMedia, cursosOtros, countAlumnosCurso,
+    alumnosBasica, alumnosMedia, alumnosOtros
+  } = useCoordinadorDashboardViewModel();
 
   return (
     <DashboardContainer>
-      <HeaderModulo 
-        titulo="Panel de Coordinación" 
-        correo={currentUser?.email}
-      />
-
+      <HeaderModulo titulo="Panel de Coordinación" correo={currentUser?.email} />
       <StyledDivider />
-
-        <PanelDashboard 
-          metricas={metricas} 
-          onSelectMetrica={(id) => setMetricaSeleccionada(id === metricaSeleccionada ? null : id)} 
-        />
-
-        <DetalleMetricasCoordinador 
-          metricaId={metricaSeleccionada} 
-          docentes={docentes} 
-          cursos={cursos} 
-          alumnos={alumnos} 
-          asignaciones={asignaciones}
-        />
-
+      
+      <MetricPanel 
+        metricas={metricas}
+        metricaSeleccionada={metricaSeleccionada}
+        onSelectMetrica={(id) => setMetricaSeleccionada(id === metricaSeleccionada ? null : id)}
+      />
+      
+      <TablasDetalleCoordinador 
+        metrica={metricaSeleccionada}
+        docentes={docentes}
+        cursosBasica={cursosBasica} cursosMedia={cursosMedia} cursosOtros={cursosOtros}
+        countAlumnosCurso={countAlumnosCurso}
+        alumnosBasica={alumnosBasica} alumnosMedia={alumnosMedia} alumnosOtros={alumnosOtros}
+      />
     </DashboardContainer>
   );
 };

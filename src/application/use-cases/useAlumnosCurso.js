@@ -1,51 +1,59 @@
-import { useState, useEffect } from 'react';
-import { alumnoCursoRepository, cursoRepository } from '../../infrastructure/repositories/HttpCursosRepository';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
+// CUSTOM HOOK
 // define el hook custom para manejar la lógica de alumnos por curso
 export const useAlumnosCurso = (cursoId) => {
-  const [curso, setCurso] = useState(null); // almacena la información del curso actual
-  const [asignaciones, setAsignaciones] = useState([]); // almacena los alumnos matriculados en este curso
-  const [loading, setLoading] = useState(true); // indica el estado de carga
+  const queryClient = useQueryClient();
+  const { alumnoCursoRepository, cursoRepository } = useDependencies();
 
   // carga los datos del curso y sus asignaciones desde el backend
-  const cargarDatos = async () => {
-    setLoading(true);
-    try {
+  const { data: curso = null, isLoading: loadingCurso } = useQuery({
+    queryKey: ['curso', cursoId],
+    queryFn: async () => {
+      if (!cursoId) return null;
       const cursos = await cursoRepository.getAll();
-      const current = cursos.find(c => c.id === parseInt(cursoId));
-      setCurso(current);
+      return cursos.find(c => c.id === parseInt(cursoId)) || null;
+    },
+    enabled: !!cursoId
+  });
 
+  const { data: asignacionesBase, isLoading: loadingAsignaciones } = useQuery({
+    queryKey: ['asignacionesPorCurso', cursoId],
+    queryFn: async () => {
+      if (!cursoId) return [];
       const lista = await alumnoCursoRepository.getByCurso(cursoId);
-      setAsignaciones(Array.isArray(lista) ? lista : []);
-    } catch (err) {
-      console.error("Error al cargar datos del curso:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return Array.isArray(lista) ? lista : [];
+    },
+    enabled: !!cursoId
+  });
 
-  // ejecuta la carga de datos cada vez que cambia el cursoId
-  useEffect(() => {
-    if (cursoId) {
-      cargarDatos();
-    }
-  }, [cursoId]);
+  const asignaciones = asignacionesBase || [];
+  const loading = loadingCurso || loadingAsignaciones;
+
+  const asignarMutation = useMutation({
+    mutationFn: async (alumnoId) => {
+      await alumnoCursoRepository.asignar({
+        alumno: { id: alumnoId },
+        curso: { id: parseInt(cursoId) }
+      });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['asignacionesPorCurso', cursoId] })
+  });
+
+  const desvincularMutation = useMutation({
+    mutationFn: (id) => alumnoCursoRepository.desvincular(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['asignacionesPorCurso', cursoId] })
+  });
 
   // asigna un alumno específico al curso actual
   const asignarAlumno = async (alumnoId) => {
-    await alumnoCursoRepository.asignar({
-      alumno: { id: alumnoId },
-      curso: { id: parseInt(cursoId) }
-    });
-    await cargarDatos(); // recarga los datos después de asignar
+    await asignarMutation.mutateAsync(alumnoId);
   };
 
   // elimina la vinculación de un alumno con el curso
   const desvincularAlumno = async (id) => {
-    if (window.confirm("¿Deseas quitar al alumno de este curso?")) {
-      await alumnoCursoRepository.desvincular(id);
-      await cargarDatos(); // recarga los datos después de desvincular
-    }
+    await desvincularMutation.mutateAsync(id);
   };
 
   return { 

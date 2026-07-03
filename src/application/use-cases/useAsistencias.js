@@ -1,45 +1,55 @@
-import { useState, useEffect } from 'react';
-import { asistenciaRepository } from '../../infrastructure/repositories/HttpAsistenciaRepository';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
+// CUSTOM HOOK
+// maneja la lógica de asistencias
 export const useAsistencias = () => {
-  const [asistencias, setAsistencias] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const { asistenciaRepository } = useDependencies();
 
-  const cargarAsistencias = async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  // ejecuta la acción asíncrona de cargarAsistencias
+  const { 
+    data: asistenciasBase = [], 
+    isLoading: loading, 
+    isError, 
+    error: queryError,
+    refetch: cargarAsistencias 
+  } = useQuery({
+    queryKey: ['asistencias'],
+    queryFn: async () => {
       const data = await asistenciaRepository.getAll();
-      setAsistencias(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Fallo al obtener asistencias:", err);
-      setError('No se pudo conectar con el servicio de asistencia.');
-      setAsistencias([]);
-    } finally {
-      setLoading(false);
+      return Array.isArray(data) ? data : [];
     }
-  };
+  });
 
-  useEffect(() => {
-    cargarAsistencias();
-  }, []);
+  const asistencias = Array.isArray(asistenciasBase) ? asistenciasBase : [];
+  const error = isError ? (queryError?.message || 'No se pudo conectar con el servicio de asistencia.') : null;
+
+  const createMutation = useMutation({
+    mutationFn: (asistencia) => asistenciaRepository.create(asistencia),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['asistencias'] })
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, asistencia }) => asistenciaRepository.update(id, asistencia),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['asistencias'] })
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => asistenciaRepository.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['asistencias'] })
+  });
 
   const crear = async (asistencia) => {
-    await asistenciaRepository.create(asistencia);
-    await cargarAsistencias();
+    return await createMutation.mutateAsync(asistencia);
   };
 
   const actualizar = async (id, asistencia) => {
-    await asistenciaRepository.update(id, asistencia);
-    await cargarAsistencias();
+    return await updateMutation.mutateAsync({ id, asistencia });
   };
 
   const eliminar = async (id) => {
-    if (window.confirm("¿Seguro que deseas eliminar esta asistencia?")) {
-      await asistenciaRepository.delete(id);
-      await cargarAsistencias();
-    }
+    await deleteMutation.mutateAsync(id);
   };
 
   return { asistencias, loading, error, crear, actualizar, eliminar, cargarAsistencias };

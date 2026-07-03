@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useMensajeria } from '../../../../application/use-cases/useMensajeria';
 import { useCargaAcademica } from '../../../../application/use-cases/useCargaAcademica';
 import { useCursos } from '../../../../application/use-cases/useCursos';
 import { alumnoCursoRepository } from '../../../../infrastructure/repositories/HttpCursosRepository';
 import { useSnackbar } from '../../../../application/context/SnackbarContext';
 
+// CUSTOM HOOK
 // define el hook personalizado para separar la lógica de negocio de la vista del profesor
 export const useMensajeriaProfesor = (currentUser) => {
   const { enviarMensaje, loading } = useMensajeria();
@@ -15,13 +16,21 @@ export const useMensajeriaProfesor = (currentUser) => {
   const [misAlumnos, setMisAlumnos] = useState([]);
   const [loadingAlumnos, setLoadingAlumnos] = useState(true);
 
-  // filtra cursos y alumnos correspondientes al profesor autenticado
-  const miHorario = cargas.filter(c => c.docenteId === currentUser?.profile?.id);
-  const misCursosIds = [...new Set(miHorario.map(c => c.cursoId))];
-  const misCursos = cursos.filter(c => misCursosIds.includes(c.id));
+  // filtra cursos y alumnos correspondientes al profesor autenticado (MEMOIZADO)
+  const misCursosIds = useMemo(() => {
+    if (!cargas || !currentUser?.profile?.id) return [];
+    const miHorario = cargas.filter(c => c.docenteId === currentUser.profile.id);
+    return [...new Set(miHorario.map(c => c.cursoId))];
+  }, [cargas, currentUser?.profile?.id]);
+
+  const misCursos = useMemo(() => {
+    if (!cursos || !misCursosIds) return [];
+    return cursos.filter(c => misCursosIds.includes(c.id));
+  }, [cursos, misCursosIds]);
 
   // obtiene y mapea los alumnos asignados a los cursos del profesor
   useEffect(() => {
+// ejecuta la acción asíncrona de fetchAsignaciones
     const fetchAsignaciones = async () => {
       setLoadingAlumnos(true);
       try {
@@ -48,7 +57,8 @@ export const useMensajeriaProfesor = (currentUser) => {
     } else {
       setLoadingAlumnos(false);
     }
-  }, [loadingCargas, JSON.stringify(misCursosIds)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingCargas, misCursosIds]);
 
   // maneja el envío, resuelve los correos de destino y despacha la petición al hook
   const handleSubmit = async (form) => {
@@ -88,10 +98,10 @@ export const useMensajeriaProfesor = (currentUser) => {
     }
   };
 
-  const alcancesOpciones = [
+  const alcancesOpciones = useMemo(() => [
     { value: 'CURSO', label: 'Un Curso Específico' },
     { value: 'ALUMNO', label: 'Un Alumno Específico' }
-  ];
+  ], []);
 
   return {
     loading,

@@ -1,26 +1,22 @@
-import { useState, useEffect } from 'react';
-import { alumnoCursoRepository } from '../../infrastructure/repositories/HttpCursosRepository';
+import { useQuery } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
+// CUSTOM HOOK
+// maneja la lógica de asignacionesalumnos
 export const useAsignacionesAlumnos = () => {
-  const [asignaciones, setAsignaciones] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const cargarAsignaciones = async () => {
-    setLoading(true);
-    try {
+  const { alumnoCursoRepository } = useDependencies();
+  // ejecuta la acción asíncrona de cargarAsignaciones
+  const { 
+    data: asignaciones = [], 
+    isLoading: loading, 
+    refetch: cargarAsignaciones 
+  } = useQuery({
+    queryKey: ['asignacionesAlumnos'],
+    queryFn: async () => {
       const data = await alumnoCursoRepository.getAll();
-      setAsignaciones(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error cargando asignaciones:", error);
-      setAsignaciones([]);
-    } finally {
-      setLoading(false);
+      return Array.isArray(data) ? data : [];
     }
-  };
-
-  useEffect(() => {
-    cargarAsignaciones();
-  }, []);
+  });
 
   return { asignaciones, loading, cargarAsignaciones };
 };

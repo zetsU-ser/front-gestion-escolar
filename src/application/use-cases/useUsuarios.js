@@ -1,50 +1,38 @@
-import { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { firebaseConfig } from '../../infrastructure/firebase/firebaseConfig';
-import { usuarioRepository } from '../../infrastructure/repositories/HttpUsuarioRepository';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
+// CUSTOM HOOK
+// maneja la lógica de usuarios
 export const useUsuarios = (filtroTipo = null) => {
-  const [usuarios, setUsuarios] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const { usuarioRepository, authRepository } = useDependencies();
 
-  const cargarUsuarios = async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  // ejecuta la acción asíncrona de cargarUsuarios delegada a React Query
+  const { 
+    data: usuariosBase = [], 
+    isLoading: loading, 
+    isError, 
+    error: queryError, 
+    refetch: cargarUsuarios 
+  } = useQuery({
+    queryKey: ['usuarios', filtroTipo],
+    queryFn: async () => {
       const data = await usuarioRepository.getAll();
-      const resultado = filtroTipo
+      return filtroTipo
         ? data.filter((u) => u.rol === filtroTipo)
         : data;
-      setUsuarios(resultado);
-    } catch (err) {
-      setError('Fallo de conexión con el servicio de usuarios.');
-    } finally {
-      setLoading(false);
     }
-  };
+  });
 
-  useEffect(() => {
-    cargarUsuarios();
-  }, [filtroTipo]);
+  const usuarios = Array.isArray(usuariosBase) ? usuariosBase : [];
+  const error = isError ? (queryError?.message || 'Fallo de conexión con el servicio de usuarios.') : null;
 
-  const crear = async (usuario) => {
-    try {
-      const appName = "FirebaseSyncApp";
-      let secondaryApp;
-      try {
-        secondaryApp = initializeApp(firebaseConfig, appName);
-      } catch (e) { /* Ya inicializada */ }
-      
-      const secondaryAuth = getAuth(secondaryApp);
-      
-      try {
-        await createUserWithEmailAndPassword(secondaryAuth, usuario.email, usuario.password);
-      } catch (fbError) {
-        if (fbError.code !== 'auth/email-already-in-use') throw fbError;
-      }
+  const createMutation = useMutation({
+    mutationFn: async (usuario) => {
+      // 1. Delegamos el registro en Firebase al Repositorio de Autenticación
+      await authRepository.register(usuario.email, usuario.password);
 
+      // 2. Preparamos los datos para nuestro Backend
       const { password, ...datosBase } = usuario;
       const datosParaBackend = {
         ...datosBase,
@@ -52,24 +40,39 @@ export const useUsuarios = (filtroTipo = null) => {
         rol: usuario.rol
       };
       
+      // 3. Delegamos el guardado en Backend al Repositorio de Usuarios
       await usuarioRepository.create(datosParaBackend);
-      await cargarUsuarios();
-    } catch (err) {
+    },
+    onSuccess: () => {
+      // 4. Actualizamos el estado de la vista
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+    },
+    onError: (err) => {
       console.error("Error crítico en creación de usuario:", err);
       throw err;
     }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, usuario }) => usuarioRepository.update(id, usuario),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['usuarios'] })
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => usuarioRepository.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['usuarios'] })
+  });
+
+  const crear = async (usuario) => {
+    await createMutation.mutateAsync(usuario);
   };
 
   const actualizar = async (id, usuario) => {
-    await usuarioRepository.update(id, usuario);
-    await cargarUsuarios();
+    await updateMutation.mutateAsync({ id, usuario });
   };
 
   const eliminar = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este acceso?")) {
-      await usuarioRepository.delete(id);
-      await cargarUsuarios();
-    }
+    await deleteMutation.mutateAsync(id);
   };
 
   return { usuarios, loading, error, crear, actualizar, eliminar };

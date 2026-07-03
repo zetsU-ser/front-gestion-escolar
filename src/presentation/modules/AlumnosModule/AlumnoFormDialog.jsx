@@ -23,6 +23,8 @@ const estadoInicial = {
   telefonoApoderado: ''
 };
 
+// VIEW PATTERN
+// renderiza la vista de alumnoformdialog
 export const AlumnoFormDialog = ({ open, onClose, onGuardar, alumnoEditar }) => {
 
   const {

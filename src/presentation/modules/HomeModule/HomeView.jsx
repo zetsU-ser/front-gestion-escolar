@@ -1,36 +1,19 @@
-import { useNavigate, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { useHomeViewModel } from './hooks/useHomeViewModel';
+import { HomeContainer, WelcomeTitle, Subtitle, LoginButton } from './HomeView.styles';
 
-import { useAuth } from '../../../application/context/AuthContext';
-
-import {
-  HomeContainer,
-  WelcomeTitle,
-  Subtitle,
-  LoginButton
-} from './HomeView.styles';
-
+// VIEW PATTERN
+// renderiza la vista de homeview
 export const HomeView = () => {
-  const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, handleGoToLogin } = useHomeViewModel();
 
-  // Si ya está autenticado, no debería ver el home, sino su dashboard
-  if (currentUser) {
-    return <Navigate to="/" replace />;
-  }
+  if (currentUser) return <Navigate to="/" replace />;
 
   return (
     <HomeContainer>
-      <WelcomeTitle variant="h2">
-        Sistema de Gestión Escolar
-      </WelcomeTitle>
-      <Subtitle variant="h5">
-        Bienvenido a la plataforma educativa. Por favor inicia sesión para continuar.
-      </Subtitle>
-      <LoginButton 
-        variant="contained" 
-        color="primary" 
-        onClick={() => navigate('/login')}
-      >
+      <WelcomeTitle variant="h2">Sistema de Gestión Escolar</WelcomeTitle>
+      <Subtitle variant="h5">Bienvenido a la plataforma educativa. Por favor inicia sesión para continuar.</Subtitle>
+      <LoginButton variant="contained" color="primary" onClick={handleGoToLogin}>
         Ingresar al Sistema
       </LoginButton>
     </HomeContainer>

@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Button, Paper, Typography, Stack, TableContainer, TableHead, TableCell, Divider } from '@mui/material';
+import { Box, Button, Paper, Typography, Stack, TableContainer, TableHead, TableCell, Divider, Table, TableRow, TableBody } from '@mui/material';
 
 export const MainContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),

@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Paper, Typography, Divider, Stack, Button } from '@mui/material';
+import { Box, Paper, Typography, Divider, Stack, Button, TableContainer, Table, TableCell, TableRow } from '@mui/material';
 
 export const DashboardContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -51,4 +51,34 @@ export const ManagementButton = styled(Button)(({ theme }) => ({
   textTransform: 'none',
   fontSize: '1.1rem',
   boxShadow: '0 4px 14px 0 rgba(0,118,255,0.39)',
+}));
+
+export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  marginTop: theme.spacing(4),
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: theme.shadows[3],
+}));
+
+export const TableHeaderBox = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.common.white,
+  borderTopLeftRadius: theme.shape.borderRadius * 2,
+  borderTopRightRadius: theme.shape.borderRadius * 2,
+  '& .MuiTypography-root': {
+    color: 'inherit',
+  }
+}));
+
+export const HeaderCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: 'bold',
+}));
+
+export const GroupHeaderRow = styled(TableRow)(({ theme }) => ({
+  backgroundColor: theme.palette.action.hover,
+  cursor: 'pointer',
+}));
+
+export const IndentedCell = styled(TableCell)(({ theme }) => ({
+  paddingLeft: theme.spacing(4),
 }));

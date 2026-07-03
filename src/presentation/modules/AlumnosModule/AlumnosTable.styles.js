@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Typography, Button, TableContainer, TableHead, TableCell, Divider } from '@mui/material';
+import { Box, Typography, Button, TableContainer, TableHead, TableCell, Divider, Table, TableRow, TableBody } from '@mui/material';
 
 export const LoadingText = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -48,4 +48,14 @@ export const ButtonContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'flex-end',
   marginBottom: theme.spacing(2),
+}));
+
+export const FiltersContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(3),
+}));
+
+export const StyledTable = styled(Table)(({ theme }) => ({
+  minWidth: 650,
 }));

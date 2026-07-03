@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Typography, Button, TableContainer, TableHead, TableCell, Divider, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Button, TableContainer, TableHead, TableCell, Divider, Alert, CircularProgress, Table, TableRow, TableBody } from '@mui/material';
 
 export const LoadingContainer = styled(Box)(({ theme }) => ({
   textAlign: 'center',
@@ -25,6 +25,10 @@ export const AddButton = styled(Button)(({ theme }) => ({
 export const TablePaper = styled(TableContainer)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2,
   boxShadow: theme.shadows[4],
+}));
+
+export const StyledTable = styled(Table)(({ theme }) => ({
+  minWidth: 650,
 }));
 
 export const StyledTableHeader = styled(TableHead)(({ theme }) => ({

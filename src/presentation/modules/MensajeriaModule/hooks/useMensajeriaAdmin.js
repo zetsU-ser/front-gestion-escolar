@@ -5,6 +5,7 @@ import { useSnackbar } from '../../../../application/context/SnackbarContext';
 import { useAlumnos } from '../../../../application/use-cases/useAlumnos';
 import { alumnoCursoRepository } from '../../../../infrastructure/repositories/HttpCursosRepository';
 
+// CUSTOM HOOK
 // define el hook personalizado para separar la lógica de negocio de la vista de administración
 export const useMensajeriaAdmin = () => {
   const { enviarMensaje, loading } = useMensajeria();
@@ -17,6 +18,7 @@ export const useMensajeriaAdmin = () => {
 
   // obtiene y mapea los alumnos con sus cursos asignados al montar el componente
   useEffect(() => {
+// ejecuta la acción asíncrona de fetchAsignaciones
     const fetchAsignaciones = async () => {
       setLoadingAsignaciones(true);
       try {
@@ -75,7 +77,7 @@ export const useMensajeriaAdmin = () => {
       };
 
       await enviarMensaje(payload);
-      showSnackbar(`¡Éxito! Se enviaron ${correosDestino.length} correo(s) correctamente.`, "success");
+      showSnackbar(`¡Éxito! ${correosDestino.length} correo(s) han sido puestos en cola y se están enviando en segundo plano.`, "success");
       return true;
     } catch (error) {
       showSnackbar(error.message, "error");

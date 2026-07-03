@@ -18,6 +18,8 @@ const NIVELES = [
 
 const LETRAS = ['A', 'B'];
 
+// VIEW PATTERN
+// renderiza la vista de cursoformdialog
 export const CursoFormDialog = ({ open, onClose, onGuardar, cursosExistentes = [] }) => {
   const [form, setForm] = useState({ nivel: '', letra: '' });
 

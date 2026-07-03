@@ -26,6 +26,8 @@ const estadoInicial = {
   asignatura_id: ''
 };
 
+// VIEW PATTERN
+// renderiza la vista de usuarioformdialog
 export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) => {
 
   const {
@@ -134,7 +136,7 @@ export const UsuarioFormDialog = ({ open, onClose, onGuardar, usuarioEditar }) =
             select
             label="Rol / Tipo de Usuario"
             name="rol"
-            value={form.rol}
+            value={form.rol || ''}
             onChange={handleChange}
           >
             {TIPOS_USUARIO.map((tipo) => (

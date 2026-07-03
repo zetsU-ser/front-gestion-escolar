@@ -1,112 +1,54 @@
-import { useContext, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-
+import { useParams } from 'react-router-dom';
 import { ArrowBack, PersonAdd } from '@mui/icons-material';
-import { AuthContext } from '../../../application/context/AuthContext';
-import { useSnackbar } from '../../../application/context/SnackbarContext';
-import { useAlumnos } from '../../../application/use-cases/useAlumnos';
-import { useAsignacionesAlumnos } from '../../../application/use-cases/useAsignacionesAlumnos';
-import { useAlumnosCurso } from '../../../application/use-cases/useAlumnosCurso';
-
-import { TablaAlumnosCurso } from '../../components/organisms/TablaAlumnosCurso';
-import { ModalMatricularAlumno } from '../../components/organisms/ModalMatricularAlumno';
-import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { HeaderModulo } from '../../components/HeaderModulo';
+import { TablaAsignaciones } from './components/TablaAsignaciones';
+import { ModalAsignacionMasiva } from './components/ModalAsignacionMasiva';
+import { useAlumnosCursoViewModel } from './hooks/useAlumnosCursoViewModel';
 import {
-  MainContainer, 
-  BackButton, 
-  HeaderPaper, 
-  HeaderStack, 
-  TitleText,
-  LoadingText,
-  SubtitleText,
-  EnrollButton,
-  TitleBox,
-  StyledDivider
+  MainContainer, BackButton, HeaderPaper, HeaderStack, TitleText,
+  LoadingText, SubtitleText, EnrollButton, TitleBox, StyledDivider
 } from './AlumnosCursoView.styles';
 
-// vista principal para gestionar los alumnos de un curso específico (presenter)
+// VIEW PATTERN
+// renderiza la vista de alumnoscursoview
 export const AlumnosCursoView = () => {
-  const { currentUser } = useContext(AuthContext);
-
-  const { cursoId } = useParams(); // obtiene el id del curso desde la ruta
-  const navigate = useNavigate();
-  const { showSnackbar } = useSnackbar();
-
-  // hooks y lógica de negocio abstraída
-  const { curso, asignaciones, loading, asignarAlumno, desvincularAlumno } = useAlumnosCurso(cursoId);
-  const { alumnos } = useAlumnos();
-  const { asignaciones: asignacionesGlobales, cargarAsignaciones: recargarAsignacionesGlobales } = useAsignacionesAlumnos();
-
-  const [openSelector, setOpenSelector] = useState(false); // estado del modal
-
-  // coordina la asignación y recarga el estado global
-  const handleAsignar = async (alumnoId) => {
-    try {
-      await asignarAlumno(alumnoId);
-      recargarAsignacionesGlobales();
-      showSnackbar("Alumno asignado con éxito", "success");
-    } catch (err) {
-      showSnackbar("Error al asignar: " + err.message, "error");
-    }
-  };
-
-  // coordina la desvinculación y recarga el estado global
-  const handleDesvincular = async (id) => {
-    try {
-      await desvincularAlumno(id);
-      recargarAsignacionesGlobales();
-      showSnackbar("Alumno removido con éxito", "success");
-    } catch (error) {
-      showSnackbar("Error al remover: " + error.message, "error");
-    }
-  };
+  const { cursoId } = useParams();
+  const {
+    currentUser, navigate, curso, asignaciones, loading,
+    openSelector, setOpenSelector, seleccionados, alumnosDisponibles,
+    handleCloseModal, handleToggleSeleccion, handleAsignarMasivo, handleDesvincular, calcularEdad
+  } = useAlumnosCursoViewModel(cursoId);
 
   if (loading || !curso) return <LoadingText>Cargando información del curso...</LoadingText>;
 
   return (
     <MainContainer>
-      <HeaderModulo 
-        titulo="Gestión de Curso Específico"
-        correo={currentUser?.email}
-      />
+      <HeaderModulo titulo="Gestión de Curso Específico" correo={currentUser?.email} />
       <StyledDivider />
 
       <BackButton startIcon={<ArrowBack />} onClick={() => navigate('/cursos')}>
         Volver a Cursos
       </BackButton>
+      
       <HeaderPaper elevation={2}>
         <HeaderStack direction="row">
           <TitleBox>
-            <TitleText variant="h4">
-              {curso.nivel} {curso.letra}
-            </TitleText>
+            <TitleText variant="h4">{curso.nivel} {curso.letra}</TitleText>
             <SubtitleText>Lista de Alumnos Matriculados</SubtitleText>
           </TitleBox>
-          <EnrollButton 
-            variant="contained" 
-            startIcon={<PersonAdd />} 
-            onClick={() => setOpenSelector(true)} // abre el modal
-          >
+          <EnrollButton variant="contained" startIcon={<PersonAdd />} onClick={() => setOpenSelector(true)}>
             Matricular Alumno
           </EnrollButton>
         </HeaderStack>
       </HeaderPaper>
 
-      {/* organismo para la tabla de registros */}
-      <TablaAlumnosCurso 
-        asignaciones={asignaciones} 
-        onDesvincular={handleDesvincular} 
-      />
+      <TablaAsignaciones asignaciones={asignaciones} handleDesvincular={handleDesvincular} />
 
-      {/* organismo modal aislado */}
-      <ModalMatricularAlumno 
-        open={openSelector} 
-        onClose={() => setOpenSelector(false)} 
-        alumnos={alumnos} 
-        asignacionesGlobales={asignacionesGlobales} 
-        onAsignar={handleAsignar} 
+      <ModalAsignacionMasiva 
+        openSelector={openSelector} handleCloseModal={handleCloseModal} 
+        handleToggleSeleccion={handleToggleSeleccion} handleAsignarMasivo={handleAsignarMasivo}
+        alumnosDisponibles={alumnosDisponibles} seleccionados={seleccionados} calcularEdad={calcularEdad}
       />
     </MainContainer>
   );
 };
-

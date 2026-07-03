@@ -20,7 +20,7 @@ export const FormPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: '#ffffff',
 }));
 
-export const SendButton = styled(Button)(({ theme }) => ({
+export const StyledButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(4),
   padding: theme.spacing(1.5, 4),
   fontWeight: 'bold',
@@ -29,4 +29,20 @@ export const SendButton = styled(Button)(({ theme }) => ({
 
 export const StyledDivider = styled(Divider)(({ theme }) => ({
   marginBottom: theme.spacing(4),
+}));
+
+export const CascadaContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(3),
+  paddingLeft: theme.spacing(2),
+  borderLeft: `4px solid ${theme.palette.primary.main}`,
+}));
+
+export const AlumnoContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(3),
+  paddingLeft: theme.spacing(2),
+  borderLeft: `4px solid ${theme.palette.secondary.main}`,
 }));

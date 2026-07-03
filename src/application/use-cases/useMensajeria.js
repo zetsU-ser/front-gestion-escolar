@@ -1,13 +1,12 @@
-import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
-import axiosClient from '../../infrastructure/api/axiosClient';
-
+// CUSTOM HOOK
+// maneja la lógica de mensajeria
 export const useMensajeria = () => {
-  const [loading, setLoading] = useState(false);
-
-  const enviarMensaje = async (payload) => {
-    setLoading(true);
-    try {
+  const { mensajeRepository } = useDependencies();
+  const enviarMutation = useMutation({
+    mutationFn: async (payload) => {
       const { destinatarios, asunto, cuerpo_mensaje } = payload;
       
       // Enviamos el correo individualmente a la cola de ms-asistencia
@@ -16,9 +15,9 @@ export const useMensajeria = () => {
 
       for (const dest of destinatarios) {
         try {
-          await axiosClient.post('/mensaje', {
+          await mensajeRepository.enviar({
             alumnoId: Number(dest.alumnoId),
-            profesorId: 1,
+            profesorId: 1, // Podría venir de AuthContext en el futuro
             destinatario: String(dest.correo),
             asunto: String(asunto),
             mensaje: String(cuerpo_mensaje),
@@ -39,10 +38,13 @@ export const useMensajeria = () => {
         success: true, 
         message: `Se enviaron ${enviosExitosos} mensajes correctamente. Fallaron ${enviosFallidos}.` 
       };
-    } finally {
-      setLoading(false);
     }
+  });
+
+  // ejecuta la acción asíncrona de enviarMensaje
+  const enviarMensaje = async (payload) => {
+    return await enviarMutation.mutateAsync(payload);
   };
 
-  return { enviarMensaje, loading };
+  return { enviarMensaje, loading: enviarMutation.isPending || enviarMutation.isLoading };
 };

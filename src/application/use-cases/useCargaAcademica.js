@@ -1,89 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
-// Mock hook for Carga Academica (Horarios)
+// CUSTOM HOOK
+// maneja la lógica de cargaacademica
 export const useCargaAcademica = () => {
-  const [cargas, setCargas] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { cargaAcademicaRepository } = useDependencies();
 
-  const cargarCargas = async () => {
-    setLoading(true);
-    try {
-      await new Promise(r => setTimeout(r, 500));
-      const saved = localStorage.getItem('mockCargas');
-      if (saved) {
-        setCargas(JSON.parse(saved));
-      } else {
-        // Seed initial data if empty to allow testing
-        // You can change docenteId: 1 to whatever your test teacher ID is
-        const initial = [
-          { id: 1, diaSemana: 'LUNES', bloqueHorario: 1, cursoId: 1, docenteId: 1, asignaturaId: 1 },
-          { id: 2, diaSemana: 'MARTES', bloqueHorario: 2, cursoId: 2, docenteId: 1, asignaturaId: 2 },
-        ];
-        setCargas(initial);
-        localStorage.setItem('mockCargas', JSON.stringify(initial));
-      }
-    } catch (error) {
-      console.error("Error cargando la carga académica:", error);
-    } finally {
-      setLoading(false);
+  // ejecuta la acción asíncrona de cargarCargas
+  const { 
+    data: cargas = [], 
+    isLoading: loading,
+    refetch: cargarCargas
+  } = useQuery({
+    queryKey: ['cargaAcademica'],
+    queryFn: async () => {
+      const data = await cargaAcademicaRepository.getAll();
+      return data || [];
     }
-  };
+  });
 
-  useEffect(() => {
-    cargarCargas();
-  }, []);
-
-  const asignarBloque = async (payload) => {
-    try {
-      await new Promise(r => setTimeout(r, 500));
+  const createMutation = useMutation({
+    mutationFn: async (payload) => {
+      const requestPayload = {
+        curso: { id: payload.cursoId },
+        docente: { id: payload.docenteId },
+        asignatura: { id: payload.asignaturaId },
+        dia_semana: payload.diaSemana,
+        bloque_horario: payload.bloqueHorario
+      };
       
-      // Validaciones de sobreasignación
-      const conflictoCurso = cargas.find(c => 
-        c.cursoId === payload.cursoId && 
-        c.diaSemana === payload.diaSemana && 
-        c.bloqueHorario === payload.bloqueHorario
-      );
+      return await cargaAcademicaRepository.create(requestPayload);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cargaAcademica'] })
+  });
 
-      if (conflictoCurso) {
-        throw new Error("El curso ya tiene una asignatura asignada en este bloque horario.");
-      }
-
-      const conflictoDocente = cargas.find(c =>
-        c.docenteId === payload.docenteId &&
-        c.diaSemana === payload.diaSemana &&
-        c.bloqueHorario === payload.bloqueHorario
-      );
-
-      if (conflictoDocente) {
-        throw new Error("El docente ya se encuentra ocupado en este bloque horario en otro curso.");
-      }
-
-      setCargas(prev => {
-        const newCargas = [...prev, { id: Date.now(), ...payload }];
-        localStorage.setItem('mockCargas', JSON.stringify(newCargas));
-        return newCargas;
-      });
-      return true;
-    } catch (error) {
-      console.error("Error asignando bloque:", error);
-      throw error;
-    }
-  };
-
-  const eliminarBloque = async (id) => {
-    try {
-      await new Promise(r => setTimeout(r, 500));
-      setCargas(prev => {
-        const newCargas = prev.filter(c => c.id !== id);
-        localStorage.setItem('mockCargas', JSON.stringify(newCargas));
-        return newCargas;
-      });
-      return true;
-    } catch (error) {
-      console.error("Error eliminando bloque:", error);
+  const deleteMutation = useMutation({
+    mutationFn: (id) => cargaAcademicaRepository.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cargaAcademica'] }),
+    onError: (error) => {
+      console.error("Error eliminando bloque en DB:", error);
       throw new Error("No se pudo eliminar el bloque horario.");
     }
+  });
+
+  // ejecuta la acción asíncrona de asignarBloque
+  const asignarBloque = async (payload) => {
+    return await createMutation.mutateAsync(payload);
   };
 
-  return { cargas, loading, asignarBloque, eliminarBloque };
+  // ejecuta la acción asíncrona de eliminarBloque
+  const eliminarBloque = async (id) => {
+    return await deleteMutation.mutateAsync(id);
+  };
+
+  return { cargas, loading, asignarBloque, eliminarBloque, cargarCargas };
 };

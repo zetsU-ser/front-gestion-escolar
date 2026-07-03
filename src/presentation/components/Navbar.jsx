@@ -1,5 +1,5 @@
 import React from 'react';
-import { Toolbar, Container, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Divider } from '@mui/material';
+import { ListItem, ListItemButton } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
 import SchoolIcon from '@mui/icons-material/School';
@@ -11,27 +11,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../application/context/AuthContext';
 import { authRepository } from '../../infrastructure/repositories/HttpAuthRepository';
 import {
-  StyledAppBar,
-  LogoText,
-  LogoSpan,
-  NavContainer,
-  LogoutButton
+  LogoText, LogoSpan, AppContainer, SidebarDrawer, 
+  SidebarHeader, SidebarDivider, NavList, NavIcon, 
+  NavText, LogoutList, LogoutListItemButton, LogoutIconWrapper, 
+  LogoutText, MainContent
 } from './Navbar.styles';
 
 const DRAWER_WIDTH = 280;
 
-/**
- * Plantilla (Template): NavigationLayout (antes Navbar)
- * Gestiona el layout completo de la aplicación dependiendo del rol.
- * - Docentes: Navbar superior.
- * - Admin/Coordinador: Sidebar lateral persistente.
- */
+// COMPONENT PATTERN
+// renderiza la barra de navegación y panel lateral según el rol del usuario
 export const Navbar = ({ children }) => {
   const { currentUser, isAdmin, isCoordinador } = useAuth();
   const navigate = useNavigate();
 
   if (!currentUser) return <>{children}</>;
 
+  // cierra la sesión del usuario actual
   const handleLogout = async () => {
     try {
       await authRepository.logout();
@@ -44,47 +40,30 @@ export const Navbar = ({ children }) => {
   const dashboardPath = isAdmin() ? '/admin' : isCoordinador() ? '/coordinador' : '/profesor';
   const isTeacher = !isAdmin() && !isCoordinador();
 
+  // construye la estructura base de un enlace del menú
   const renderMenuItem = (text, path, icon) => (
     <ListItem disablePadding key={text}>
       <ListItemButton component={Link} to={path}>
-        <ListItemIcon sx={{ color: 'primary.main' }}>
+        <NavIcon>
           {icon}
-        </ListItemIcon>
-        <ListItemText primary={text} sx={{ color: 'text.secondary', fontWeight: 'medium' }} />
+        </NavIcon>
+        <NavText primary={text} />
       </ListItemButton>
     </ListItem>
   );
 
-  const backgroundStyle = {
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-    minHeight: '100vh',
-  };
-
-  // LAYOUT PARA TODOS: Sidebar lateral permanente
+  // estructura principal de la navegación
   return (
-    <Box sx={{ display: 'flex', ...backgroundStyle }}>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
-            boxSizing: 'border-box',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            borderRight: '1px solid rgba(0, 0, 0, 0.08)',
-          },
-        }}
-      >
-        <Box sx={{ px: 3, py: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <LogoText variant="h5" align="center" sx={{ cursor: 'pointer' }} onClick={() => navigate(dashboardPath)}>
-            COLEGIO <br /><LogoSpan component="span" sx={{ fontSize: '1.2rem' }}>MS-GA</LogoSpan>
+    <AppContainer>
+      <SidebarDrawer variant="permanent" $drawerWidth={DRAWER_WIDTH}>
+        <SidebarHeader>
+          <LogoText variant="h5" align="center" onClick={() => navigate(dashboardPath)}>
+            COLEGIO <br /><LogoSpan component="span">MS-GA</LogoSpan>
           </LogoText>
-        </Box>
-        <Divider sx={{ mb: 2, mx: 2 }} />
+        </SidebarHeader>
+        <SidebarDivider />
         
-        <List sx={{ flexGrow: 1, px: 2 }}>
+        <NavList>
           {renderMenuItem('Dashboard', dashboardPath, <DashboardIcon />)}
           
           {isAdmin() && (
@@ -105,31 +84,31 @@ export const Navbar = ({ children }) => {
 
           {isTeacher && (
             <>
-              {/* Para Asistencia y Evaluaciones requerimos el curso y asignatura, los mandamos al dashboard para que elijan */}
+              {/* opciones específicas del rol docente */}
               {renderMenuItem('Asistencia', '/profesor/asistencia', <AssignmentIcon />)}
               {renderMenuItem('Evaluaciones', '/profesor/evaluaciones', <AssignmentIcon />)}
               {renderMenuItem('Mensajería', '/profesor/mensajeria', <EmailIcon />)}
             </>
           )}
-        </List>
+        </NavList>
 
-        <Divider sx={{ mx: 2, mb: 2 }} />
-        <List sx={{ px: 2, pb: 4 }}>
+        <SidebarDivider />
+        <LogoutList>
           <ListItem disablePadding>
-            <ListItemButton onClick={handleLogout} sx={{ borderRadius: 2, '&:hover': { backgroundColor: 'error.light' } }}>
-              <ListItemIcon sx={{ color: 'error.main' }}>
+            <LogoutListItemButton onClick={handleLogout}>
+              <LogoutIconWrapper>
                 <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText primary="Salir" sx={{ color: 'error.main', fontWeight: 'bold' }} />
-            </ListItemButton>
+              </LogoutIconWrapper>
+              <LogoutText primary="Salir" />
+            </LogoutListItemButton>
           </ListItem>
-        </List>
-      </Drawer>
+        </LogoutList>
+      </SidebarDrawer>
       
-      {/* Contenido Principal */}
-      <Box component="main" sx={{ flexGrow: 1, p: 4 }}>
+      {/* renderiza el contenido central de la aplicación */}
+      <MainContent component="main">
         {children}
-      </Box>
-    </Box>
+      </MainContent>
+    </AppContainer>
   );
 };

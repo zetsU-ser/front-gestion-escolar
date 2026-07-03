@@ -1,46 +1,57 @@
-import { useState, useEffect } from 'react';
-import { alumnoRepository } from '../../infrastructure/repositories/HttpAlumnoRepository';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDependencies } from '../context/DependencyContext';
 
+// CUSTOM HOOK
+// maneja la lógica asíncrona de alumnos mediante caché centralizada
 export const useAlumnos = () => {
-  const [alumnos, setAlumnos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const { alumnoRepository } = useDependencies();
 
-  const cargarAlumnos = async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  // ejecuta la consulta asíncrona de alumnos delegada a React Query
+  const { 
+    data: alumnos = [], 
+    isLoading: loading, 
+    isError, 
+    error: queryError, 
+    refetch: cargarAlumnos 
+  } = useQuery({
+    queryKey: ['alumnos'],
+    queryFn: async () => {
       const data = await alumnoRepository.getAll();
-      // Aseguramos formato array para renderizado
-      setAlumnos(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Fallo al obtener alumnos:", err);
-      setError('No se pudo conectar con el servicio de gestión académica.');
-      setAlumnos([]); 
-    } finally {
-      setLoading(false);
+      return Array.isArray(data) ? data : [];
     }
-  };
+  });
 
-  useEffect(() => {
-    cargarAlumnos();
-  }, []);
+  const error = isError ? (queryError?.message || 'No se pudo conectar con el servicio de gestión académica.') : null;
+
+  // mutación para crear un nuevo registro y revalidar la caché
+  const createMutation = useMutation({
+    mutationFn: (alumno) => alumnoRepository.create(alumno),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alumnos'] }),
+  });
+
+  // mutación para actualizar un registro existente y revalidar la caché
+  const updateMutation = useMutation({
+    mutationFn: ({ id, alumno }) => alumnoRepository.update(id, alumno),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alumnos'] }),
+  });
+
+  // mutación para eliminar un registro y revalidar la caché
+  const deleteMutation = useMutation({
+    mutationFn: (id) => alumnoRepository.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alumnos'] }),
+  });
 
   const crear = async (alumno) => {
-    await alumnoRepository.create(alumno);
-    await cargarAlumnos(); // Actualizacion reactiva
+    await createMutation.mutateAsync(alumno);
   };
 
   const actualizar = async (id, alumno) => {
-    await alumnoRepository.update(id, alumno);
-    await cargarAlumnos();
+    await updateMutation.mutateAsync({ id, alumno });
   };
 
   const eliminar = async (id) => {
-    if (window.confirm("¿Seguro que deseas eliminar la ficha de este alumno?")) {
-      await alumnoRepository.delete(id);
-      await cargarAlumnos();
-    }
+    await deleteMutation.mutateAsync(id);
   };
 
   return { alumnos, loading, error, crear, actualizar, eliminar, cargarAlumnos };

@@ -1,47 +1,21 @@
-import { useContext, useState } from 'react';
-
-import { AuthContext } from '../../../application/context/AuthContext';
-import { useMensajeriaAdmin } from './hooks/useMensajeriaAdmin';
-
-import { FormularioMensajeriaGlobal } from '../../components/organisms/FormularioMensajeriaGlobal';
-import { HeaderModulo } from '../../components/molecules/HeaderModulo';
+import { HeaderModulo } from '../../components/HeaderModulo';
+import { FormularioMensaje } from './components/FormularioMensaje';
+import { useMensajeriaViewModel } from './hooks/useMensajeriaViewModel';
 import { MainContainer, StyledDivider } from './MensajeriaView.styles';
 
-// define la página para enviar comunicados oficiales a los apoderados
-// utiliza FormularioMensajeriaGlobal como organismo principal
+// VIEW PATTERN
+// renderiza la vista de mensajeriaview
 export const MensajeriaView = () => {
-  const { currentUser } = useContext(AuthContext);
-  
-  // extrae toda la lógica y estado desde el hook personalizado (Patrón Custom Hook / Presenter)
-  const {
-    cursos,
-    alumnosRaw,
-    loading,
-    loadingCursos,
-    loadingAlumnos,
-    loadingAsignaciones,
-    handleSubmit
-  } = useMensajeriaAdmin();
+  const viewModel = useMensajeriaViewModel();
 
   return (
     <MainContainer>
-      {/* muestra el encabezado del módulo */}
       <HeaderModulo
         titulo="Mensajería Oficial Institucional"
-        correo={currentUser?.email}
+        correo={viewModel.currentUser?.email}
       />
-
-
-      <StyledDivider /> {/* separador visual idéntico al dashboard */}
-
-      <FormularioMensajeriaGlobal
-        onSubmit={handleSubmit}
-        loading={loading}
-        cursosRaw={cursos}
-        alumnosRaw={alumnosRaw}
-        loadingCursos={loadingCursos}
-        loadingAlumnos={loadingAlumnos || loadingAsignaciones}
-      />
+      <StyledDivider />
+      <FormularioMensaje viewModel={viewModel} />
     </MainContainer>
   );
 };
